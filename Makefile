@@ -21,16 +21,19 @@ HEADER		= 	./include/All.hpp \
 
 SRC_FILES	=	./src/main.cpp \
 				./src/ft_sleep.cpp \
-				./src/checkErrorHttpRequest/ft_checkErrorHttpRequest.cpp \
-				./src/handleClient/ft_handleClient.cpp \
-				./src/parseConfigAndSetEpoll_serverLoop/ft_parseConfigAndSetEpoll.cpp \
-				./src/parseConfigAndSetEpoll_serverLoop/ft_serverLoop.cpp 
+				./src/Response/ft_checkErrorHttpRequest.cpp \
+				./src/Response/ft_getPostDelete.cpp \
+				./src/Response/ft_redirect.cpp \
+				./src/Run_server/ft_handleClient.cpp \
+				./src/Run_server/ft_parseHttpRequest.cpp \
+				./src/Run_server/ft_serverLoop.cpp \
+				./src/Set_server/ft_parseConfig.cpp \
+				./src/Set_server/ft_setEpoll.cpp
 
-				
 
-FOLDER_1	=	checkErrorHttpRequest
-FOLDER_2	=	handleClient
-FOLDER_3	=	parseConfigAndSetEpoll_serverLoop
+FOLDER_1	=	Response
+FOLDER_2	=	Run_server
+FOLDER_3	=	Set_server
 FOLDER_4	=	
 
 PORT 		= 	9091

@@ -47,13 +47,10 @@ void ft_serverLoop(int epoll_fd,
     {
         // if (ft_checkLeakFd() == 1)
         //     break;
-
         int nfds = epoll_wait(epoll_fd, events, MAX_EVENTS, -1);
-
         for (int i = 0; i < nfds; ++i) 
         {
             int fd = events[i].data.fd;
-
             bool isServerFd = false;
             for (std::map<int, int>::iterator it = portToFd.begin(); it != portToFd.end(); ++it) 
             {
@@ -63,7 +60,6 @@ void ft_serverLoop(int epoll_fd,
                     break;
                 }
             }
-
             if (isServerFd) 
             {
                 int client_fd = accept(fd, 0, 0);
@@ -89,7 +85,6 @@ void ft_serverLoop(int epoll_fd,
                 else 
                 {
                     std::cout << BLUE << "buffer ==> Request:\n" << buffer << RESET << std::endl;
-
                     ft_handleClient(fd, buffer);
                     close(fd);
                     epoll_ctl(epoll_fd, EPOLL_CTL_DEL, fd, 0);

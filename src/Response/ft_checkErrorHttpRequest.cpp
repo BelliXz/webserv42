@@ -103,7 +103,9 @@ int ft_checkErrorHttpRequest(const HttpRequest& req, int client_fd)
     // ✅ 6. ตรวจ 404 Not Found (จำกัดเฉพาะ path ที่อนุญาต)
     if (req.path != "/" && req.path != "/hello" && req.path != "/search") {
         std::ostringstream html;
-        html << "<html><body><h1>404 Not Found</h1></body></html>";
+        // html << "<!DOCTYPE html>\n"
+        //      << "<html><body><h1>Hello from Webserv!</h1></body></html>\n";
+        html << HTML_404_TEMPLATE;
         std::string body = html.str();
         std::ostringstream res;
         res << "HTTP/1.1 404 Not Found\r\n"
@@ -113,7 +115,11 @@ int ft_checkErrorHttpRequest(const HttpRequest& req, int client_fd)
             << body;
         send(client_fd, res.str().c_str(), res.str().size(), 0);
         return 404;
+
+
+
     }
+
 
     // ✅ 7. ตรวจ 401 Unauthorized (ถ้าไม่มี Cookie)
     if (req.path == "/cookie" && req.cookie.empty()) {
@@ -271,41 +277,4 @@ int ft_checkErrorHttpRequest(const HttpRequest& req, int client_fd)
 //     // ✅ OK → ไม่มี error
 //     return 200;
 // }
-
-
-void ft_redirect(int client_fd, const std::string& location, int status_code) {
-	std::ostringstream res;
-	std::string status_text;
-
-	switch (status_code) 
-    {
-		case 301: status_text = "Moved Permanently"; break;
-		case 302: status_text = "Found"; break;
-		case 303: status_text = "See Other"; break;
-		case 307: status_text = "Temporary Redirect"; break;
-		case 308: status_text = "Permanent Redirect"; break;
-		default:
-			status_code = 302;
-			status_text = "Found";
-			break;
-	}
-
-	res << "HTTP/1.1 " << status_code << " " << status_text << "\r\n"
-	    << "Location: " << location << "\r\n"
-	    << "Content-Length: 0\r\n"
-	    << "Connection: close\r\n"
-	    << "\r\n";
-
-	std::string response = res.str();
-	send(client_fd, response.c_str(), response.size(), 0);
-
-	std::cout << "[Redirect] " << status_code << " → " << location << "\n";
-}
-
-// เคสการใช้งานจริง
-// URL เดิม	              ต้อง redirect ไป	 เหตุผล
-// /old-home	             /new-home	      เปลี่ยนชื่อ path
-// /redirect	             /	              ใช้ทดสอบ
-// /index.html	             /	              ทำให้ URL สั้นลง
-// /login (หลัง POST สำเร็จ)	/dashboard	     ส่ง user ไปหน้าถัดไป
 
