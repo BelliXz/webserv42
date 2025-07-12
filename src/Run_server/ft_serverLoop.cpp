@@ -75,7 +75,7 @@ void ft_serverLoop(int epoll_fd,
             else 
             {
                 char buffer[BUFFER_SIZE] = {0};
-                int bytes = recv(fd, buffer, sizeof(buffer), 0);
+                int bytes = recv(fd, buffer, sizeof(buffer), 0); // อ่าน fd ลง buffer
                 if (bytes <= 0) 
                 {
                     std::cout << "Client disconnected: " << fd << "\n";

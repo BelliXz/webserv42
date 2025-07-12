@@ -20,7 +20,6 @@ void ft_sleep(int nb)
 // int main()
 // {
 // 	ft_sleep(4);
-
 // 	return(0);
 // }
 
