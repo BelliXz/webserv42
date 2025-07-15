@@ -4,9 +4,9 @@
 #include "../../include/All.hpp"
 
 
-void ft_parseHttpRequest(char* buffer, HttpRequest& req) 
+int ft_parseHttpRequest(char* buffer, HttpRequest& req, int fd) 
 {
-    std::string         request(buffer);
+    (void)fd;
     req.rawBody.assign(buffer, buffer + strlen(buffer)); // เก็บ raw body
             // คือการ คัดลอกข้อมูลดิบ (raw data) ทั้งหมดจาก buffer 
             // ซึ่งเป็น HTTP request ที่รับเข้ามา (char*) 
@@ -53,15 +53,28 @@ void ft_parseHttpRequest(char* buffer, HttpRequest& req)
             //     // req.rawBody now contains: {'G','E','T',' ','/',' ',...,'\r','\n','\r','\n'}
             ////////////////////////////////////////////////////////////// 
 
-
+    std::string         request(buffer);
     std::istringstream  stream(request);
     std::string         line;
             // สร้าง stream สำหรับอ่านทีละบรรทัดจาก request
 
     // 1. Parse request line
-    if (std::getline(stream, line)) {
-        std::istringstream reqLine(line);
-        reqLine >> req.method >> req.path >> req.version;
+    if (std::getline(stream, line)) 
+    {
+        std::istringstream      reqLine(line);
+        // reqLine >> req.method >> req.path >> req.version ;
+        reqLine >> req.method >> req.path >> req.version >> req.afterVersion;
+
+        // if (!req.afterVersion.empty())
+        // {
+        //     std::cout << std::left << std::setw(18) << "Debug afterVersion has text:"         << req.afterVersion        << " <===error\n";
+        //     ft_400BadRequest(fd);
+        //     return(-1);
+        // }
+        // std::cout << std::left << std::setw(18) << "Check finish loop (if error AfterVersion have text )";
+
+
+
             // example
             //     GET /hello?name=kit HTTP/1.1
             //     → จะได้:
@@ -71,7 +84,7 @@ void ft_parseHttpRequest(char* buffer, HttpRequest& req)
 
 
         // แยก query ออก (ถ้ามี ?)
-        size_t qPos = req.path.find('?');
+        size_t      qPos = req.path.find('?');
         if (qPos != std::string::npos) {
             req.query = req.path.substr(qPos + 1);
             req.path = req.path.substr(0, qPos);
@@ -85,10 +98,10 @@ void ft_parseHttpRequest(char* buffer, HttpRequest& req)
 
     // 2. Parse headers
     while (std::getline(stream, line) && line != "\r") {
-        size_t pos = line.find(':');
+        size_t      pos = line.find(':');
         if (pos != std::string::npos) {
-            std::string key = line.substr(0, pos);
-            std::string value = line.substr(pos + 1);
+            std::string     key = line.substr(0, pos);
+            std::string     value = line.substr(pos + 1);
 
             // ft_trim spaces
             key.erase(key.find_last_not_of(" \r\n") + 1);
@@ -114,7 +127,7 @@ void ft_parseHttpRequest(char* buffer, HttpRequest& req)
 
     // 3. Parse body (ถ้ามี)
     // (กรณี POST หรือมีเนื้อหา)
-    std::string body;
+    std::string     body;
     while (std::getline(stream, line)) {
         body += line + "\n";
     }
@@ -128,7 +141,7 @@ void ft_parseHttpRequest(char* buffer, HttpRequest& req)
 
 
     // 4. ชื่อไฟล์ (จาก path)
-    size_t lastSlash = req.path.find_last_of('/');
+    size_t  lastSlash = req.path.find_last_of('/');
     if (lastSlash != std::string::npos && lastSlash + 1 < req.path.length()) {
         req.filename = req.path.substr(lastSlash + 1);
     } else {
@@ -140,6 +153,13 @@ void ft_parseHttpRequest(char* buffer, HttpRequest& req)
  
     // ✅ ตั้งค่า complete บอกว่า request นี้ parse เสร็จเรียบร้อย
     req.complete = true;
+
+
+    std::cout << GREEN;
+    ft_printHttpRequest(req);
+    std::cout << GREEN << RESET;
+
+    return(0);
 }
     // ตัวอย่างผลลัพธ์ที่ได้จากการ parse
     // จาก input:
@@ -185,10 +205,10 @@ void ft_printHttpRequest(const HttpRequest& req) {
     for (std::map<std::string, std::string>::const_iterator it = req.headers.begin(); 
         it != req.headers.end(); 
         ++it) {
-        std::cout << "  - " << it->first << ": " << it->second << "\n";
+        std::cout << "  - " << it->first << ": " << it->second   << "\n";
     }
 
-    std::cout << std::left << std::setw(18) << "body:" << "\n" << req.body << "\n";
+    std::cout << std::left << std::setw(18) << "body:" << "\n"   << req.body << "\n";
 
     std::cout << std::left << std::setw(18) << "rawBody size:"   << req.rawBody.size() << " bytes\n";
     std::cout << "===============================\n";

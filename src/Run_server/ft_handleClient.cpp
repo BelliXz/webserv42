@@ -3,20 +3,21 @@
 // #include "HttpRequest.hpp"
 #include "../../include/All.hpp"
 
-void ft_handleClient(int client_fd, char* buffer) 
+// void ft_handleClient(int client_fd, char* buffer) 
+void ft_handleClient(int client_fd, HttpRequest req) 
 {
-    HttpRequest req;
-    ft_parseHttpRequest(buffer, req);  // แยกข้อมูลออกจาก raw HTTP request     <=== paser
+    // HttpRequest req;
+    // ft_parseHttpRequest(buffer, req);  // แยกข้อมูลออกจาก raw HTTP request     <=== paser
 
-    std::cout << GREEN;
-    ft_printHttpRequest(req);
-    std::cout << GREEN << RESET;
+    // std::cout << GREEN;
+    // ft_printHttpRequest(req);
+    // std::cout << GREEN << RESET;
     
 
     //////////////////////
 	if (req.path == "/redirect") 
     {
-		ft_redirect(client_fd, "/", 301); // → stop here  fix 301 ??
+		ft_redirect(client_fd, "/", 301); // → stop here  fix 301 ??????
 		return;
 	}
     //////////////////////
@@ -26,7 +27,11 @@ void ft_handleClient(int client_fd, char* buffer)
     if (status != 200)
         return;
 
+        
+    // <=== check CGI ?????
 
+
+        
     // === เลือกตาม method ========================
     if (req.method == "GET")
         ft_handleGet(client_fd, req);

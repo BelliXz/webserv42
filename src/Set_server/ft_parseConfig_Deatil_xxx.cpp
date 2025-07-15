@@ -51,10 +51,16 @@ std::string ft_stripAfterSemicolon(const std::string& s) {
 }
 
 
+
+
+// คืนค่า: map โดย key  = port, 
+//               value = vector ของ ServerConfig ที่อยู่บน port นั้น
+
 std::map<int, std::vector<ServerConfig> > ft_parseConfigFile(const std::string& filename) 
 {
     std::ifstream                               file(filename.c_str());
-    if (!file.is_open()) throw std::runtime_error("Unable to open config file");
+    if (!file.is_open()) 
+        throw std::runtime_error("Unable to open config file");
 
     std::map<int, std::vector<ServerConfig> >   servers;
     ServerConfig                                currentServer;
@@ -66,8 +72,22 @@ std::map<int, std::vector<ServerConfig> > ft_parseConfigFile(const std::string& 
     while (std::getline(file, line)) 
     {
         line = ft_trim(line);
-        if (line.empty() || line[0] == '#') continue;
+        if (line.empty() || line[0] == '#') 
+            continue;
 
+            // โครงสร้าง block ที่รองรับ:
+            //         server { ... }
+            //         เป็นจุดเริ่มต้นของ server block
+                    
+            //         location /xxx { ... }
+            //         block ย่อยภายใน server — เก็บไว้ใน currentRoute
+
+            // การจัดการ context:
+            // ตัวแปร inServer และ inLocation จะบอกว่ากำลังอยู่ใน block ใด
+            // เมื่อเจอ }:
+            // ถ้าอยู่ใน location → เก็บ currentRoute ใส่ currentServer.routes
+            // ถ้าอยู่ใน server → เก็บ currentServer เข้า map ตาม port
+            
         if (line == "server {") 
         {
             inServer = true;
@@ -82,28 +102,48 @@ std::map<int, std::vector<ServerConfig> > ft_parseConfigFile(const std::string& 
                 currentServer.routes.push_back(currentRoute);
                 inLocation = false;
             } 
+                // ถ้าอยู่ใน location { ... }:
+                // ใช้ if (inLocation)
+                // root, index, upload_store → เก็บ string (ลบ ;)
+                // client_max_body_size → แปลงเป็น int
+                // autoindex on/off → true/false
+                // allowed_methods GET POST; → vector
+                // cgi_pass .php /usr/bin/php-cgi; → map<ext, path>
+                // return 301 /new_path; → redirect
+
             else if (inServer) 
             {
                 servers[currentServer.port].push_back(currentServer);
                 inServer = false;
             }
+                // ถ้าอยู่ใน server:
+                // ใช้คำสั่งระดับ server
+                // listen 8080; → currentServer.port
+                // host 127.0.0.1;
+                // server_name my.local another.local; → vector
+                // client_max_body_size → global สำหรับ server
+                // error_page 404 /404.html; → map<code, path>
             continue;
+
+            // เป็นการปิด block และเก็บค่าที่สะสมไว้
         }
 
-        if (!inServer) continue;
+        if (!inServer)
+            continue;
 
         if (line.find("location") == 0) 
         {
             inLocation = true;
             currentRoute = RouteConfig();
-            std::vector<std::string>    parts = ft_splitWord(line);
+            std::vector<std::string> parts = ft_splitWord(line);
             if (parts.size() >= 2)
                 currentRoute.path = parts[1];
             continue;
         }
 
-        std::vector<std::string>        tokens = ft_splitWord(line);
-        if (tokens.empty()) continue;
+        std::vector<std::string> tokens = ft_splitWord(line);
+        if (tokens.empty()) 
+            continue;
 
         // ---------- Inside Location Block ----------
         if (inLocation) 
@@ -143,7 +183,7 @@ std::map<int, std::vector<ServerConfig> > ft_parseConfigFile(const std::string& 
         }
 
         // ---------- Server-level Directives ----------
-        std::string     key = tokens[0];
+        std::string key = tokens[0];
 
         if (key == "listen")
             currentServer.port = ft_stoi(ft_stripAfterSemicolon(tokens[1]));
@@ -161,7 +201,6 @@ std::map<int, std::vector<ServerConfig> > ft_parseConfigFile(const std::string& 
     }
 
     file.close();
-    ft_printServer(servers); //<=====
     return servers;
 }
 

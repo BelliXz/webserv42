@@ -35,7 +35,7 @@ void ft_serverLoop(int epoll_fd,
                    epoll_event *events) 
 {
     (void)serversByPort;
-    epoll_event ev;
+    epoll_event     ev;
     std::memset(&ev, 0, sizeof(ev));
 
     std::cout << CYAN;
@@ -47,11 +47,13 @@ void ft_serverLoop(int epoll_fd,
     {
         // if (ft_checkLeakFd() == 1)
         //     break;
-        int nfds = epoll_wait(epoll_fd, events, MAX_EVENTS, -1);
+        int     nfds = epoll_wait(epoll_fd, events, MAX_EVENTS, -1);
         for (int i = 0; i < nfds; ++i) 
         {
-            int fd = events[i].data.fd;
-            bool isServerFd = false;
+            int     fd = events[i].data.fd;
+            bool    isServerFd = false;
+
+
             for (std::map<int, int>::iterator it = portToFd.begin(); it != portToFd.end(); ++it) 
             {
                 if (it->second == fd) 
@@ -62,7 +64,7 @@ void ft_serverLoop(int epoll_fd,
             }
             if (isServerFd) 
             {
-                int client_fd = accept(fd, 0, 0);
+                int     client_fd = accept(fd, 0, 0);
                 if (client_fd >= 0) 
                 {
                     ft_setNonBlocking(client_fd);
@@ -74,18 +76,30 @@ void ft_serverLoop(int epoll_fd,
             } 
             else 
             {
-                char buffer[BUFFER_SIZE] = {0};
-                int bytes = recv(fd, buffer, sizeof(buffer), 0); // อ่าน fd ลง buffer
+                char    buffer[BUFFER_SIZE] = {0};
+                int     bytes = recv(fd, buffer, sizeof(buffer), 0); // อ่าน fd ลง buffer
+
                 if (bytes <= 0) 
                 {
+                    std::cout << RED ;
+                    std::cout << "epoll system monitor fd = " << fd << "\n";
                     std::cout << "Client disconnected: " << fd << "\n";
+                    std::cout << RED  << RESET;
+
                     close(fd);
                     epoll_ctl(epoll_fd, EPOLL_CTL_DEL, fd, 0);
                 } 
                 else 
                 {
-                    std::cout << BLUE << "buffer ==> Request:\n" << buffer << RESET << std::endl;
-                    ft_handleClient(fd, buffer);
+                    
+                    std::cout << BLUE;
+                    std::cout << "epoll system monitor fd = " << fd << "\n";
+                    std::cout << "buffer ==> Request:\n" << buffer << std::endl;
+                    std::cout << BLUE  << RESET;
+
+                    HttpRequest     req;
+                    ft_parseHttpRequest(buffer, req, fd); // แยกข้อมูลออกจาก raw HTTP request     <=== paser            
+                    ft_handleClient(fd, req);
                     close(fd);
                     epoll_ctl(epoll_fd, EPOLL_CTL_DEL, fd, 0);
                 }
@@ -93,5 +107,4 @@ void ft_serverLoop(int epoll_fd,
         }
     }
 }
-
 

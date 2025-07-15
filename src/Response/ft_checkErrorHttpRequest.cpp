@@ -34,6 +34,17 @@ int ft_checkErrorHttpRequest(const HttpRequest& req, int client_fd)
     // 411	    Length Required
     // 413	    Payload Too Large
 
+
+
+
+    if (!req.afterVersion.empty())
+    {
+        std::cout << std::left << std::setw(18) << "Debug afterVersion has text:"         << req.afterVersion        << " <===error\n";
+        ft_400BadRequest(client_fd);
+        return(400);
+    }
+
+
     // ✅ 1. ตรวจ 400 Syntax Error → missing method/path/version
     if (req.method.empty() || req.path.empty() || req.version.empty()) {
         std::string res =
@@ -215,66 +226,15 @@ int ft_checkErrorHttpRequest(const HttpRequest& req, int client_fd)
 
 
 
+void    ft_400BadRequest(int client_fd){
 
+    std::string res =
+        "HTTP/1.1 400 Bad Request\r\n"
+        "Content-Type: text/plain\r\n"
+        "Content-Length: 11\r\n"
+        "Connection: close\r\n"
+        "\r\n"
+        "Bad Request";
+    send(client_fd, res.c_str(), res.size(), 0);
 
-
-// int ft_checkErrorHttpRequest______old(const HttpRequest& req, int client_fd) {
-//     // ✅ 1. ตรวจ 400 Syntax (ไม่มี method/path/version)
-//     if (req.method.empty() || req.path.empty() || req.version.empty()) {
-//         std::string res =
-//             "HTTP/1.1 400 Bad Request\r\n"
-//             "Content-Type: text/plain\r\n"
-//             "Content-Length: 11\r\n"
-//             "Connection: close\r\n"
-//             "\r\n"
-//             "Bad Request";
-//         send(client_fd, res.c_str(), res.size(), 0);
-//         return 400;
-//     }
-
-//     // ✅ 2. ตรวจ 405 Method ที่ไม่รองรับ
-//     if (req.method != "GET" && req.method != "POST" && req.method != "DELETE") {
-//         std::string res =
-//             "HTTP/1.1 405 Method Not Allowed\r\n"
-//             "Allow: GET, POST, DELETE\r\n"
-//             "Content-Type: text/plain\r\n"
-//             "Content-Length: 18\r\n"
-//             "Connection: close\r\n"
-//             "\r\n"
-//             "Method Not Allowed";
-//         send(client_fd, res.c_str(), res.size(), 0);
-//         return 405;
-//     }
-
-//     // ✅ 3. ตรวจ 403 path ที่ต้องห้าม  ตรวจ path ที่ห้ามเข้าถึง 
-//     if (req.path == "/secret") {
-//         std::string res =
-//             "HTTP/1.1 403 Forbidden\r\n"
-//             "Content-Type: text/plain\r\n"
-//             "Content-Length: 9\r\n"
-//             "Connection: close\r\n"
-//             "\r\n"
-//             "Forbidden";
-//         send(client_fd, res.c_str(), res.size(), 0);
-//         return 403;
-//     }
-
-//     // ✅ 4. ตรวจ 404 path ไม่พบ ตรวจว่า path มีหรือไม่มี
-//     if (req.path != "/" && req.path != "/hello") {
-//         std::ostringstream html;
-//         html << HTML_404_TEMPLATE;
-//         std::string body = html.str();
-//         std::ostringstream res;
-//         res << "HTTP/1.1 404 Not Found\r\n"
-//             << "Content-Type: text/html\r\n"
-//             << "Content-Length: " << body.size() << "\r\n"
-//             << "\r\n"
-//             << body;
-//         send(client_fd, res.str().c_str(), res.str().size(), 0);
-//         return 404;
-//     }
-
-//     // ✅ OK → ไม่มี error
-//     return 200;
-// }
-
+}

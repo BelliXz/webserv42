@@ -10,6 +10,10 @@ class HttpRequest
         std::string             path;                       // ✅ URL path เช่น "/", "/login", "/images/logo.png"
         std::string             query;                      // ✅ ส่วน query string หลัง "?" เช่น "?id=5&name=foo"     //&
         std::string             version;                    // ✅ HTTP version เช่น "HTTP/1.1"
+   
+
+        std::string             afterVersion; //<add15jul>  GET / HTTP/1.1 XXX  <===XXX  is wrong req 
+        
         std::string             body;                       // ✅ เนื้อหาของ request (ใช้กับ POST/PUT)
         std::vector<char>       rawBody;                    // ✅ สำเนา raw body (ใช้เก็บ binary หรือ upload ได้)
         std::string             contenttype;                // ✅ ค่า Content-Type จาก header เช่น "text/html", "application/json"

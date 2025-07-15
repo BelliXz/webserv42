@@ -19,6 +19,8 @@ int ft_setEpoll(std::map<int, std::vector<ServerConfig> > &serversByPort,
     epoll_event ev;
     std::memset(&ev, 0, sizeof(ev));
 
+    std::cout << "epoll system Ready(epoll_fd=" << epoll_fd << ")\n";
+       
     for (std::map<int, std::vector<ServerConfig> >::iterator it = serversByPort.begin(); 
         it != serversByPort.end(); 
         ++it) 

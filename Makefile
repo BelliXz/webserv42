@@ -51,7 +51,7 @@ $(NAME): $(OBJ_TARGETS) $(HEADER) Makefile
 	$(CC) $(CFLAGS) $(OBJ_TARGETS) -o $@
 	@echo "$(YELLOW)✅ make all finish$(COLOR_RESET)"
 	@echo "$(YELLOW)run =======> ./$(NAME) <xxx.conf>$(COLOR_RESET)"
-	@echo "$(YELLOW)or  =======> make t (and other terminal make t16)"
+	@echo "$(YELLOW)or  =======> make t (and other terminal make t16)$(COLOR_RESET)"
 
 
 $(OBJ_DIR)/%.o: %.cpp $(HEADER) Makefile
@@ -112,6 +112,8 @@ h200:
 	xdg-open ./html/200.html 
 h404:
 	xdg-open ./html/404.html 
+htest:
+	xdg-open ./html/test.html 
 
 
 #curl เป็นเครื่องมือ command-line ที่ใช้ส่ง HTTP request ไปยัง server และดู response ได้ 
@@ -255,3 +257,88 @@ t21:
 
 t22:
 	bash test_get.sh
+
+
+
+
+
+t23:
+	curl -v -X GET "http://$(HOST):$(PORT)/search?q=webserv&lang=en" \
+		-H "User-Agent: curl/7.68.0" \
+		-H "Accept: */*" \
+		-H "Cookie: PHPSESSID=xyz789"
+
+# --- Basic GET ---
+t24:
+	curl -v -X GET "http://$(HOST):$(PORT)/index.html"
+
+# --- POST Form ---
+t25:
+	curl -v -X POST "http://$(HOST):$(PORT)/login" \
+		-H "Content-Type: application/x-www-form-urlencoded" \
+		--data "username=kit&password=1234"
+
+# --- POST Upload ---
+t26:
+	curl -v -X POST "http://$(HOST):$(PORT)/upload" \
+		-F "file=@test_data/hello.txt"
+
+# --- PUT Request ---
+t27:
+	curl -v -X PUT "http://$(HOST):$(PORT)/data/user.json" \
+		-H "Content-Type: application/json" \
+		--data '{"name": "kit", "email": "kit@42.fr"}'
+
+# --- DELETE ---
+t28:
+	curl -v -X DELETE "http://$(HOST):$(PORT)/uploads/delete_me.jpg"
+
+# --- HEAD ---
+t29:
+	curl -v -X HEAD "http://$(HOST):$(PORT)/index.html"
+
+# --- OPTIONS ---
+t30:
+	curl -v -X OPTIONS "http://$(HOST):$(PORT)/upload"
+
+# --- Invalid Method ---
+t31:
+	@echo -e "GETTT / HTTP/1.1\r\nHost: $(HOST):$(PORT)\r\n\r\n" | nc $(HOST) $(PORT)
+
+# --- Not Found ---
+t32:
+	curl -v -X GET "http://$(HOST):$(PORT)/no_such_file.html"
+
+# --- Redirect ---
+t33:
+	curl -v -X GET "http://$(HOST):$(PORT)/old-path" -L
+
+# --- CGI Example ---
+t34:
+	curl -v -X GET "http://$(HOST):$(PORT)/script.php"
+
+# --- Too Large ---
+t35:
+	@perl -e 'print "A"x10000000' > bigfile.txt
+	curl -v -X POST "http://$(HOST):$(PORT)/upload" \
+		-H "Content-Type: application/octet-stream" \
+		--data-binary "@bigfile.txt"
+
+# --- Chunked ---
+t36:
+	@echo -e "POST /upload HTTP/1.1\r\nHost: $(HOST):$(PORT)\r\nTransfer-Encoding: chunked\r\n\r\n4\r\nWiki\r\n5\r\npedia\r\n0\r\n\r\n" | nc $(HOST) $(PORT)
+
+
+
+
+###############################################################
+
+FOLDER  = กระดาษทด/
+PROGRAM = a.out
+
+FT_TEST = ft_vector_assign.cpp
+
+c:
+	c++ กระดาษทด/$(FT_TEST) -o $(FOLDER)$(PROGRAM)  &&  ./$(FOLDER)$(PROGRAM) 
+
+
