@@ -1,22 +1,8 @@
 
 
-#include "../../include/All.hpp"
+#include "../../include/ServerConfig.hpp"
 
-// สรุปสิ่งที่โค้ดทำ
-// Helper functions
-// ft_trim()
-// ลบช่องว่าง (space, tab, \r, \n) หน้า-หลังของ string
-
-// ft_stoi()
-// แปลง std::string เป็น int โดยใช้ stringstream (เทียบได้กับ std::stoi())
-
-// ft_splitWord()
-// แยก string เป็นคำ ๆ ตามช่องว่าง โดยใช้ istringstream
-
-// ft_stripAfterSemicolon()
-// ลบข้อความหลัง ; (รวม ;) เช่น root www/html; → www/html
-
-
+void ft_printServer(const std::map<int, std::vector<ServerConfig> >& serversByPort);
 
 std::string ft_trim(const std::string& str) 
 {
@@ -25,7 +11,6 @@ std::string ft_trim(const std::string& str)
     return (start == std::string::npos) ? "" : str.substr(start, end - start + 1);
 }
 
-// int port = std::stoi(portStr);
 int ft_stoi(const std::string& s) 
 {
     std::stringstream ss(s);
@@ -113,7 +98,6 @@ std::map<int, std::vector<ServerConfig> > ft_parseConfigFile(const std::string& 
             if (key == "root")
             {   
                 currentRoute.root = ft_stripAfterSemicolon(tokens[1]);
-                // std::cout <<RED "root   = " <<  currentRoute.root << RESET<< "\n";
             }
             else if (key == "index")
                 currentRoute.index = ft_stripAfterSemicolon(tokens[1]);
@@ -122,8 +106,7 @@ std::map<int, std::vector<ServerConfig> > ft_parseConfigFile(const std::string& 
             else if (key == "upload_store")
             {   
                 currentRoute.uploadStore = ft_stripAfterSemicolon(tokens[1]);
-                // std::cout <<RED "Upload = " <<  currentRoute.uploadStore << RESET<< "\n";
-                 
+        
             }
             else if (key == "autoindex")
                 currentRoute.autoIndex = (tokens[1].find("on") != std::string::npos);
