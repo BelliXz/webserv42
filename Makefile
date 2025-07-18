@@ -13,13 +13,13 @@ CFLAGS		=	-Wall -Werror -Wextra -std=c++98 -pedantic
 #########################################################
 NAME		=	webserv
 
-HEADER		=	./include/HttpRequest.hpp \
-				./include/ServerConfig.hpp 
+HEADER		=	./include/HttpRequest.hpp
+
 
 
 SRC_FILES	=	./src/main.cpp \
-				./src/Run_server/ft_parseHttpRequest.cpp \
-				./src/Set_server/ft_parseConfig.cpp 
+				./src/Run_server/ft_parseHttpRequest.cpp 
+
 
 
 
@@ -87,3 +87,7 @@ re: fclean all
 .PHONY: all clean fclean re
 
 #########################################################
+
+t: all clean
+	@echo "$(GREEN)✅ run program$(COLOR_RESET)"
+	./webserv $(CONFIG)

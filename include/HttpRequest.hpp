@@ -1,38 +1,18 @@
 
-# define BOLD 	"\033[1m"
-# define RED 	"\033[0;31m"
-# define GREEN 	"\033[0;32m"
-# define BLUE	"\033[0;34m"
-# define CYAN 	"\033[0;36m"
-# define GRAY 	"\033[0;37m"
-# define LRED 	"\033[0;91m"
-# define YELLOW	"\033[0;33m"
-# define MAGENTA "\033[0;35m" 
-# define RESET  "\033[0m"
-# define RGB 	"\033[1m\033[38;2;255;182;193m"
-
+#ifndef HTTPREQUEST_HPP
+#define HTTPREQUEST_HPP
 
 #include <sstream>
 #include <iostream>
 #include <cstring>
-#include <unistd.h> 
-#include <arpa/inet.h>
-#include <sys/epoll.h>
-#include <fcntl.h>
-#include <algorithm>
 #include <vector>
 #include <map>
 #include <cstdlib>  
 #include <iomanip>
 
-#include <fstream>
-#include <cstdio>      
-#include <sys/socket.h> 
-#include <cctype>
-
-
-
-
+# define RED 	"\033[0;31m"
+# define GREEN 	"\033[0;32m" 
+# define RESET  "\033[0m"
 
 class HttpRequest 
 {
@@ -56,6 +36,10 @@ class HttpRequest
         HttpRequest() 
             : complete(false), contentLength(0) 
         {}
+
+        int         parseHttpRequest(char* buffer, HttpRequest& req);
+        static void printHttpRequest(const HttpRequest& req);
 };
 
 
+#endif

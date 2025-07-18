@@ -2,11 +2,8 @@
 
 #include "../../include/HttpRequest.hpp"
 
-void ft_printHttpRequest(const HttpRequest& req);
-
-int ft_parseHttpRequest(char* buffer, HttpRequest& req, int fd) 
+int HttpRequest::parseHttpRequest(char* buffer, HttpRequest& req) 
 {
-    (void)fd;
     req.rawBody.assign(buffer, buffer + strlen(buffer)); 
          
     std::string         request(buffer);
@@ -59,15 +56,16 @@ int ft_parseHttpRequest(char* buffer, HttpRequest& req, int fd)
     }
     req.complete = true;
 
-    std::cout << GREEN;
-    ft_printHttpRequest(req);
-    std::cout << GREEN << RESET;
+    // std::cout << GREEN;
+    // printHttpRequest(req);
+    // std::cout << GREEN << RESET;
 
     return(0);
 }
   
 
-void ft_printHttpRequest(const HttpRequest& req) {
+void HttpRequest::printHttpRequest(const HttpRequest& req) 
+{
     std::cout << "===== HttpRequest Detail =====\n";
 
     std::cout << std::left << std::setw(18) << "method:"         << req.method        << "\n";
