@@ -1,11 +1,11 @@
 
-#ifndef WEBSERV_HPP
-#define WEBSERV_HPP
+#ifndef Server_HPP
+#define Server_HPP
 
 #include "ConfigParser.hpp"
 #include <iostream>
 
-class Webserv
+class Server
 {
 	private:
 		std::vector<ServerConfig>	serverConfigs;	
@@ -13,7 +13,7 @@ class Webserv
 
 		size_t	parseConfig(std::string config_file);		
 	public:
-		Webserv(std::string config_file);
+		Server(std::string config_file);
 
 		// add 2 ft
 		const std::vector<ServerConfig>& getServerConfigs() const ;

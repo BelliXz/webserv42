@@ -11,13 +11,13 @@ CC			=	c++
 CFLAGS		=	-Wall -Werror -Wextra -std=c++98 -pedantic
 
 #########################################################
-NAME		=	webserv
+NAME		=	Server
 
 HEADER		=	./include/ConfigParser.hpp \
 				./include/HttpRequest.hpp \
 				./include/RouteConfig.hpp \
 				./include/ServerConfig.hpp \
-				./include/Webserv.hpp 
+				./include/Server.hpp 
 
 
 SRC_FILES	=	./src/main.cpp \
@@ -25,7 +25,7 @@ SRC_FILES	=	./src/main.cpp \
 				./src/Run_server/ConfigParser.cpp \
 				./src/Set_server/RouteConfig.cpp \
 				./src/Set_server/ServerConfig.cpp \
-				./src/Set_server/Webserv.cpp 
+				./src/Set_server/Server.cpp 
 
 
 
@@ -97,4 +97,4 @@ re: fclean all
 
 t: all clean
 	@echo "$(GREEN)✅ run program$(COLOR_RESET)"
-	./webserv $(CONFIG)
+	./Server $(CONFIG)
