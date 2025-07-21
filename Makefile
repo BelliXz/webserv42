@@ -13,12 +13,19 @@ CFLAGS		=	-Wall -Werror -Wextra -std=c++98 -pedantic
 #########################################################
 NAME		=	webserv
 
-HEADER		=	./include/HttpRequest.hpp
-
+HEADER		=	./include/ConfigParser.hpp \
+				./include/HttpRequest.hpp \
+				./include/RouteConfig.hpp \
+				./include/ServerConfig.hpp \
+				./include/Webserv.hpp 
 
 
 SRC_FILES	=	./src/main.cpp \
-				./src/Run_server/ft_parseHttpRequest.cpp 
+				./src/Run_server/HttpRequest.cpp \
+				./src/Run_server/ConfigParser.cpp \
+				./src/Set_server/RouteConfig.cpp \
+				./src/Set_server/ServerConfig.cpp \
+				./src/Set_server/Webserv.cpp 
 
 
 
