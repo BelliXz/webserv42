@@ -21,7 +21,7 @@ int main(int argc, char **argv)
     signal(SIGPIPE, SIG_IGN);
     // Server     Server(config);  
     // Server.run();
-    Server::printServerConfigs(Server.getServerConfigs());
+    //Server::printServerConfigs(Server.getServerConfigs());
 
     }
 
