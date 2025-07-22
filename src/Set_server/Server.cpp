@@ -93,17 +93,19 @@ void Server::start(const std::vector<ServerConfig> &serverConfigs)
     this->serverConfigs = serverConfigs;
    // connectionController.setConfigs(serverConfigs);
     std::set<int>   used_ports;
+	int				connet = 0;
 
-    for(size_t i =0; i < serverConfigs.size(); ++i)
+    for( std::vector<ServerConfig>::iterator it = serverConfigs.begin(); it != serverConfigs.end(); ++it)
     {
-        struct ServerConfig *tmp_servcon;
-        int current_port = tmp_servcon->port;
+        int	current_port = it->getPort();
+		//cc.addRawServer(*it);
+        
 
-        // if (used_ports.find(current_port) != used_ports.end())
-		// {
-		// 	std::cout<< "Port is already bound"<<std::endl;
-		// 	continue;
-		// } 
+        if (used_ports.find(current_port) != used_ports.end())
+		{
+			std::cout<< "Port is already bound"<<std::endl;
+			continue;
+		} 
         
         try
         {
