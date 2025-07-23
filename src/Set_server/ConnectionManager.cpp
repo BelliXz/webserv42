@@ -32,3 +32,14 @@ std::vector<ServerConfig>  ConnectionManager::getRawServers()
 {
 	return rawServers;
 }
+
+void ConnectionManager::setEpollFd(int epollFd)
+{
+	epollFd = epollFd;
+}
+
+int ConnectionManager::getEpollFd()
+{
+
+	return (epollFd);
+}

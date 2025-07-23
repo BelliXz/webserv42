@@ -164,6 +164,90 @@ void Server::start(const std::vector<ServerConfig> &serverConfigs)
 int Server::run()
 {
 	std::cout<< "<<<<<<<<<<   Server run   >>>>>>>>>"<<std::endl;
+	ConnectionManager cm;
+
+	//start(cm);
+	//setupSockets(cc);
+
+	//Create epoll 
+	int epoll_fd = epoll_create1(0);
+	cm.setEpollFd(epoll_fd);
+	if (epoll_fd == -1) 
+		throw std::runtime_error("Error creating epoll instance");
+	struct epoll_event		events[SERV_MAX_EVENTS];
+	memset( events, 0 , sizeof(events));
+	
+	//add server fds into the epoll_events
+	int order = 0; 
+	for ( std::vector<int>::iterator it = serverSockets.begin(); it != serverSockets.end(); ++it)
+	{
+		events[order].events = EPOLLIN;	
+		events[order].data.fd = *it;
+		if(epoll_ctl(epoll_fd, EPOLL_CTL_ADD , *it , &events[order] ) < 0)
+			throw std::runtime_error("epoll_ctl error");
+		order ++;
+
+	}
+
+	HttpRequest 	httpRequest;
+	//time_t serviceExpires = time(0) + 10;
+	while (true) 
+	{
+			// if(WEBS_DEBUG_RUN_10_SECS && time(0) > serviceExpires)
+			// 	break; 
+
+			//int nfds = epoll_wait(epollFd, events, MAX_EVENTS, timeout);
+			int nfds = epoll_wait(epoll_fd, events , SERV_MAX_EVENTS ,SERV_WAIT_TIMEOUT);
+			// no effected fds, but happens from timeout
+			if(nfds == 0)
+				continue;
+			// error stuffs
+			if(nfds == -1)
+				throw std::runtime_error("epoll_wait error");
+
+			for (int i=0;i<nfds;i++)
+			{
+				int			active_fd = events[i].data.fd;
+				ServerConfig *server = cc.getServer(events[i].data.fd);
+				Logger::log(LC_MINOR_NOTE, "epoll event on fd#%d!" , active_fd);
+				
+				if (isServerSocket(active_fd))
+				{
+					// error handling
+					if ((events[i].events & EPOLLRDHUP) || (events[i].events & EPOLLHUP) || (events[i].events & EPOLLERR))
+					{
+						Logger::log(LC_CONN_LOG, "Listening Socket %d error, abort listening ", events[i].data.fd);
+						int error_code ;
+						socklen_t len = sizeof(error_code);
+						getsockopt(active_fd , SOL_SOCKET, SO_ERROR , &error_code , &len);
+						Logger::log(LC_ERROR, "ERROR: %s" , len);
+						close(events[i].data.fd);
+						epoll_ctl(epoll_fd, EPOLL_CTL_DEL , events[i].data.fd , NULL);
+						continue;
+					}
+
+					// upcoming new request
+					if(events[i].events & EPOLLIN)
+					{						
+
+					}
+					// end server fds
+					
+				}
+	
+				// Start client Socket checking				
+				{
+
+					
+					
+				}
+			}
+			connectionController.purgeExpiredConnections();
+
+	}
+	// this won't be reached anyway 
+	close(epoll_fd);
+	return (0);
 	
 
 }

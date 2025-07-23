@@ -4,6 +4,7 @@
 
 #include "ConfigParser.hpp"
 #include "ServerConfig.hpp"
+#include "ConnectionManager.hpp"
 #include 	<iostream>
 #include 	<vector>
 #include 	<algorithm>
@@ -18,7 +19,9 @@
 
 
 
-#define 	SERV_MAX_CONNS 100
+#define 	SERV_MAX_CONNS  	100
+#define		SERV_MAX_EVENTS 	1042
+#define		SERV_WAIT_TIMEOUT	1000
 
 class ServerConfig; 
 class ConnectionManager;
