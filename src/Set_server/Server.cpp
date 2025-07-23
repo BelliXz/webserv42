@@ -1,5 +1,5 @@
 
-#include "../../include/Server.hpp"
+#include "Server.hpp"
 
 size_t	Server::parseConfig(std::string config_file)			
 {
@@ -89,7 +89,7 @@ void Server::printServerConfigs(const std::vector<ServerConfig>& servers)
 
 void Server::start(const std::vector<ServerConfig> &serverConfigs)
 {
-    std::cout<< "Server start"<<std::endl;
+    std::cout<< "<<<<<<<<<<   Server start   >>>>>>>>>>"<<std::endl;
     this->serverConfigs = serverConfigs;
    // connectionController.setConfigs(serverConfigs);
     std::set<int>   used_ports;
@@ -134,7 +134,7 @@ void Server::start(const std::vector<ServerConfig> &serverConfigs)
             memset(&socketAddr, 0, sizeof(sockaddr));
             socketAddr.sin_family = AF_INET;
             socketAddr.sin_addr.s_addr = INADDR_ANY;
-            socketAddr.sin_port = htons(serverConfigs[i].port);
+            socketAddr.sin_port = htons(it->getPort());
 
             // binding with port
 			if (bind(serverSocket, (struct sockaddr*)&socketAddr , sizeof(socketAddr) ) < 0)
@@ -152,19 +152,21 @@ void Server::start(const std::vector<ServerConfig> &serverConfigs)
         }
         catch(std::exception &e)
         {
-    
+			throw std::runtime_error("Exception caught:" + std::string(strerror(errno)));
         }
     }
 
     //Set up multiple servers with different hostnames (use something like: curl --resolve example.com:80:127.0.0.1 http://example.com/).
-	// std::map<int, ServerConfig> temp = &tmp_servcon->servername;
-	// for( std::map<int, ServerConfig>::iterator it = temp.begin(); it != temp.end(); ++it)
-    std::map<int, ServerConfig> temp = cc.getServers();
-	for( std::map<int, ServerConfig>::iterator it = temp.begin(); it != temp.end(); ++it)
-		//Logger::log(LC_NOTE, "Server Socket #%d, listening as http://%s" , it->first,  (it->second).getNick().c_str());
+
 
 }
 
+int Server::run()
+{
+	std::cout<< "<<<<<<<<<<   Server run   >>>>>>>>>"<<std::endl;
+	
+
+}
 
 
 
