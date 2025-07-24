@@ -40,8 +40,7 @@ class ConnectionManager
 		ServerConfig				*getServer(int socket);
 		std::map<int, ServerConfig> getServers(); 
 
-		//static void					setEpollFd(int epollsocket);
-		//static  int					getEpollFd();
+
 
 		// size_t						purgeExpiredConnections();
 		//bool 						handleRequestException(RequestException &reqException,Connection &conn);
@@ -49,6 +48,9 @@ class ConnectionManager
 
 		int							addRawServer(ServerConfig server);
 		std::vector<ServerConfig>   getRawServers();
+
+		static void					setEpollFd(int epollscoket);
+		static  int					getEpollFd();
 
 };
 

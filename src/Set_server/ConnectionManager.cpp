@@ -1,6 +1,8 @@
 
 #include "ConnectionManager.hpp"
 
+int ConnectionManager::epollFd = 0; 
+
 ConnectionManager::ConnectionManager()
 {
 	std::cout<< "ConnectionManage  has been called"<<std::endl;
@@ -51,13 +53,13 @@ std::vector<ServerConfig>  ConnectionManager::getRawServers()
 	return rawServers;
 }
 
-// void ConnectionManager::setEpollFd(int epollscoket)
-// {
-// 	epollFd = epollscoket;
-// }
+void ConnectionManager::setEpollFd(int epollscoket)
+{
+	epollFd = epollscoket;
+}
 
-// int ConnectionManager::getEpollFd()
-// {
+int	 ConnectionManager::getEpollFd()
+{
 
-// 	return (epollFd);
-// }
+	return (epollFd);
+}
