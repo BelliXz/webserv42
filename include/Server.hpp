@@ -29,26 +29,31 @@ class ConnectionManager;
 class Server
 {
 	private:
-		std::vector<ServerConfig>	serverConfigs;	
-		std::string					configFile;
 		std::vector<int>			serverSockets;		
+		std::vector<ServerConfig>	serverconfigs;	
+		std::string					configFile;
+		ConnectionManager			Connectionmanager;
 
 		size_t	parseConfig(std::string config_file);
 		
 		//bool						start(ConnectionController &cc);
-		void 						start(const std::vector<ServerConfig>& configs);
 		//bool						findServerFromRequest(HttpRequest &req, ServerConfig &sc);
 		bool						isServerSocket(int fd);
-
 		
-	public:
-		Server(std::string config_file);
+		
+		public:
+		Server();
 		~Server();
+		Server(std::string config_file);
 
-		int run(void);
+		bool 				start(ConnectionManager& cm);
+		
+		int run();
 
 		std::set<int> 				getListeningPorts();
 		//ConnectionController 		&getConnectionController();
+
+		std::vector<ServerConfig>& GetServerConfigs();
 
 		// add 2 ft
 		const std::vector<ServerConfig>& getServerConfigs() const ;

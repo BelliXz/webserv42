@@ -1,16 +1,30 @@
 
 #include "Server.hpp"
 
+Server::Server() 
+{
+  
+}
+
+Server::~Server()
+{
+	std::cout<< "<<<<<<<<<<   Cleaning up socket   >>>>>>>>>>"<<std::endl;
+	for( std::vector<int>::iterator it = serverSockets.begin(); it != serverSockets.end(); ++it)
+	{
+		close(*it);
+	}
+}
+
 size_t	Server::parseConfig(std::string config_file)			
 {
-	serverConfigs = ConfigParser::parseAllConfigs(config_file);
-	if (ConfigParser::checkErrorParseAllConfigs(serverConfigs)) 
+	serverconfigs = ConfigParser::parseAllConfigs(config_file);
+	if (ConfigParser::checkErrorParseAllConfigs(serverconfigs)) 
 	{
 		std::cerr <<RED "ConfigParser: Invalid config detected. Exiting." RESET<< std::endl;
 		exit(EXIT_FAILURE);
 	}
-	// Logger::log(LC_MINOR_NOTE, "Done parsing file with %d servers", serverConfigs.size()) ;
-	return (serverConfigs.size());
+	// Logger::log(LC_MINOR_NOTE, "Done parsing file with %d servers", serverconfigs.size()) ;
+	return (serverconfigs.size());
 }
 
 
@@ -20,9 +34,16 @@ Server::Server(std::string config_file):configFile(config_file)
 	parseConfig(config_file);									
 }
 
+
+
 const std::vector<ServerConfig>& Server::getServerConfigs() const 
 {
-	return serverConfigs;
+	return serverconfigs;
+}
+
+std::vector<ServerConfig>& Server::GetServerConfigs()
+{
+	return serverconfigs;
 }
 
 void Server::printServerConfigs(const std::vector<ServerConfig>& servers) 
@@ -87,20 +108,21 @@ void Server::printServerConfigs(const std::vector<ServerConfig>& servers)
 	}
 }
 
-void Server::start(const std::vector<ServerConfig> &serverConfigs)
+bool Server::start(ConnectionManager& cm)
 {
     std::cout<< "<<<<<<<<<<   Server start   >>>>>>>>>>"<<std::endl;
-    this->serverConfigs = serverConfigs;
-   // connectionController.setConfigs(serverConfigs);
+
+
     std::set<int>   used_ports;
-	int				connet = 0;
+	int				done = 0;
+	
 
-    for( std::vector<ServerConfig>::iterator it = serverConfigs.begin(); it != serverConfigs.end(); ++it)
+    for( std::vector<ServerConfig>::iterator it = serverconfigs.begin(); it != serverconfigs.end(); ++it)
     {
+		std::cout<< "<<<<<<<<<<   Server start for loop   >>>>>>>>>>"<<std::endl;
         int	current_port = it->getPort();
-		//cc.addRawServer(*it);
-        
 
+		cm.addRawServer(*it);
         if (used_ports.find(current_port) != used_ports.end())
 		{
 			std::cout<< "Port is already bound"<<std::endl;
@@ -154,10 +176,13 @@ void Server::start(const std::vector<ServerConfig> &serverConfigs)
         {
 			throw std::runtime_error("Exception caught:" + std::string(strerror(errno)));
         }
+		done++;
     }
 
     //Set up multiple servers with different hostnames (use something like: curl --resolve example.com:80:127.0.0.1 http://example.com/).
+	std::map<int, ServerConfig> temp = cm.getServers();
 
+	return (done > 0);
 
 }
 
@@ -165,12 +190,12 @@ int Server::run()
 {
 	std::cout<< "<<<<<<<<<<   Server run   >>>>>>>>>"<<std::endl;
 	ConnectionManager cm;
-
-	//start(cm);
-	//setupSockets(cc);
-
+	
 	//Create epoll 
 	int epoll_fd = epoll_create1(0);
+	
+	start(cm);
+
 	cm.setEpollFd(epoll_fd);
 	if (epoll_fd == -1) 
 		throw std::runtime_error("Error creating epoll instance");
@@ -188,67 +213,7 @@ int Server::run()
 		order ++;
 
 	}
-
-	HttpRequest 	httpRequest;
-	//time_t serviceExpires = time(0) + 10;
-	while (true) 
-	{
-			// if(WEBS_DEBUG_RUN_10_SECS && time(0) > serviceExpires)
-			// 	break; 
-
-			//int nfds = epoll_wait(epollFd, events, MAX_EVENTS, timeout);
-			int nfds = epoll_wait(epoll_fd, events , SERV_MAX_EVENTS ,SERV_WAIT_TIMEOUT);
-			// no effected fds, but happens from timeout
-			if(nfds == 0)
-				continue;
-			// error stuffs
-			if(nfds == -1)
-				throw std::runtime_error("epoll_wait error");
-
-			for (int i=0;i<nfds;i++)
-			{
-				int			active_fd = events[i].data.fd;
-				ServerConfig *server = cc.getServer(events[i].data.fd);
-				Logger::log(LC_MINOR_NOTE, "epoll event on fd#%d!" , active_fd);
-				
-				if (isServerSocket(active_fd))
-				{
-					// error handling
-					if ((events[i].events & EPOLLRDHUP) || (events[i].events & EPOLLHUP) || (events[i].events & EPOLLERR))
-					{
-						Logger::log(LC_CONN_LOG, "Listening Socket %d error, abort listening ", events[i].data.fd);
-						int error_code ;
-						socklen_t len = sizeof(error_code);
-						getsockopt(active_fd , SOL_SOCKET, SO_ERROR , &error_code , &len);
-						Logger::log(LC_ERROR, "ERROR: %s" , len);
-						close(events[i].data.fd);
-						epoll_ctl(epoll_fd, EPOLL_CTL_DEL , events[i].data.fd , NULL);
-						continue;
-					}
-
-					// upcoming new request
-					if(events[i].events & EPOLLIN)
-					{						
-
-					}
-					// end server fds
-					
-				}
-	
-				// Start client Socket checking				
-				{
-
-					
-					
-				}
-			}
-			connectionController.purgeExpiredConnections();
-
-	}
-	// this won't be reached anyway 
-	close(epoll_fd);
-	return (0);
-	
+	return(1);
 
 }
 

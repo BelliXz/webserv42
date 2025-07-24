@@ -2,6 +2,7 @@
 #include "../include/Server.hpp"
 #include "../include/HttpRequest.hpp"
 
+#include "Server.hpp"
 #include <iostream>
 #include <exception>
 #include <signal.h>
@@ -40,8 +41,12 @@ int main(int argc, char **argv)
 		exit(EXIT_FAILURE);
 	}
     ConfigParser::printConfigParser(serverConfigs);
-    signal(SIGPIPE, SIG_IGN);
-    Server     Server(config);  
+
+   signal(SIGPIPE, SIG_IGN);
+  Server     webserver(argv[1]);
+  webserver.run();
+
+
 
 
 

@@ -25,6 +25,7 @@ class ConnectionManager
 	public:
 		ConnectionManager();		
 		~ConnectionManager();
+		void setConfigs(const std::vector<ServerConfig>& configs);
 
 		static int					epollFd; 
 
@@ -36,11 +37,11 @@ class ConnectionManager
 		// bool						handleWrite(int clientSocket);
 
 		// int							addServer(int socket, ServerConfig server);
-		// ServerConfig				*getServer(int socket);
-		// std::map<int, ServerConfig> getServers(); 
+		ServerConfig				*getServer(int socket);
+		std::map<int, ServerConfig> getServers(); 
 
-		static void					setEpollFd(int epollFd);
-		static  int					getEpollFd();
+		//static void					setEpollFd(int epollsocket);
+		//static  int					getEpollFd();
 
 		// size_t						purgeExpiredConnections();
 		//bool 						handleRequestException(RequestException &reqException,Connection &conn);
