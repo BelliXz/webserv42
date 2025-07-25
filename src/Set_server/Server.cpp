@@ -1,16 +1,30 @@
 
-#include "../../include/Server.hpp"
+#include "Server.hpp"
+
+Server::Server() 
+{
+  
+}
+
+Server::~Server()
+{
+	std::cout<< "<<<<<<<<<<   Cleaning up socket   >>>>>>>>>>"<<std::endl;
+	for( std::vector<int>::iterator it = serverSockets.begin(); it != serverSockets.end(); ++it)
+	{
+		close(*it);
+	}
+}
 
 size_t	Server::parseConfig(std::string config_file)			
 {
-	serverConfigs = ConfigParser::parseAllConfigs(config_file);
-	if (ConfigParser::checkErrorParseAllConfigs(serverConfigs)) 
+	serverconfigs = ConfigParser::parseAllConfigs(config_file);
+	if (ConfigParser::checkErrorParseAllConfigs(serverconfigs)) 
 	{
 		std::cerr <<RED "ConfigParser: Invalid config detected. Exiting." RESET<< std::endl;
 		exit(EXIT_FAILURE);
 	}
-	// Logger::log(LC_MINOR_NOTE, "Done parsing file with %d servers", serverConfigs.size()) ;
-	return (serverConfigs.size());
+	// Logger::log(LC_MINOR_NOTE, "Done parsing file with %d servers", serverconfigs.size()) ;
+	return (serverconfigs.size());
 }
 
 
@@ -20,9 +34,16 @@ Server::Server(std::string config_file):configFile(config_file)
 	parseConfig(config_file);									
 }
 
+
+
 const std::vector<ServerConfig>& Server::getServerConfigs() const 
 {
-	return serverConfigs;
+	return serverconfigs;
+}
+
+std::vector<ServerConfig>& Server::GetServerConfigs()
+{
+	return serverconfigs;
 }
 
 void Server::printServerConfigs(const std::vector<ServerConfig>& servers) 
@@ -87,23 +108,26 @@ void Server::printServerConfigs(const std::vector<ServerConfig>& servers)
 	}
 }
 
-void Server::start(const std::vector<ServerConfig> &serverConfigs)
+bool Server::start(ConnectionManager& cm)
 {
-    std::cout<< "Server start"<<std::endl;
-    this->serverConfigs = serverConfigs;
-   // connectionController.setConfigs(serverConfigs);
+    std::cout<< "<<<<<<<<<<   Server start   >>>>>>>>>>"<<std::endl;
+
+
     std::set<int>   used_ports;
+	int				done = 0;
+	
 
-    for(size_t i =0; i < serverConfigs.size(); ++i)
+    for( std::vector<ServerConfig>::iterator it = serverconfigs.begin(); it != serverconfigs.end(); ++it)
     {
-        struct ServerConfig *tmp_servcon;
-        int current_port = tmp_servcon->port;
+		std::cout<< "<<<<<<<<<<   Server start for loop   >>>>>>>>>>"<<std::endl;
+        int	current_port = it->getPort();
 
-        // if (used_ports.find(current_port) != used_ports.end())
-		// {
-		// 	std::cout<< "Port is already bound"<<std::endl;
-		// 	continue;
-		// } 
+		cm.addRawServer(*it);
+        if (used_ports.find(current_port) != used_ports.end())
+		{
+			std::cout<< "Port is already bound"<<std::endl;
+			continue;
+		} 
         
         try
         {
@@ -132,7 +156,7 @@ void Server::start(const std::vector<ServerConfig> &serverConfigs)
             memset(&socketAddr, 0, sizeof(sockaddr));
             socketAddr.sin_family = AF_INET;
             socketAddr.sin_addr.s_addr = INADDR_ANY;
-            socketAddr.sin_port = htons(serverConfigs[i].port);
+            socketAddr.sin_port = htons(it->getPort());
 
             // binding with port
 			if (bind(serverSocket, (struct sockaddr*)&socketAddr , sizeof(socketAddr) ) < 0)
@@ -150,19 +174,127 @@ void Server::start(const std::vector<ServerConfig> &serverConfigs)
         }
         catch(std::exception &e)
         {
-    
+			throw std::runtime_error("Exception caught:" + std::string(strerror(errno)));
         }
+		done++;
     }
 
     //Set up multiple servers with different hostnames (use something like: curl --resolve example.com:80:127.0.0.1 http://example.com/).
-	// std::map<int, ServerConfig> temp = &tmp_servcon->servername;
-	// for( std::map<int, ServerConfig>::iterator it = temp.begin(); it != temp.end(); ++it)
-    std::map<int, ServerConfig> temp = cc.getServers();
-	for( std::map<int, ServerConfig>::iterator it = temp.begin(); it != temp.end(); ++it)
-		//Logger::log(LC_NOTE, "Server Socket #%d, listening as http://%s" , it->first,  (it->second).getNick().c_str());
+	std::map<int, ServerConfig> temp = cm.getServers();
+
+	return (done > 0);
 
 }
 
+int Server::run()
+{
+	std::cout<< "<<<<<<<<<<   Server run   >>>>>>>>>"<<std::endl;
+	ConnectionManager cm;
+	
+	//Create epoll 
+	int epoll_fd = epoll_create1(0);
+	
+	start(cm);
+
+	cm.setEpollFd(epoll_fd);
+	if (epoll_fd == -1) 
+		throw std::runtime_error("Error creating epoll instance");
+	struct epoll_event		events[SERV_MAX_EVENTS];
+	memset( events, 0 , sizeof(events));
+	
+	//add server fds into the epoll_events
+	int order = 0; 
+	for ( std::vector<int>::iterator it = serverSockets.begin(); it != serverSockets.end(); ++it)
+	{
+		events[order].events = EPOLLIN;	
+		events[order].data.fd = *it;
+		if(epoll_ctl(epoll_fd, EPOLL_CTL_ADD , *it , &events[order] ) < 0)
+			throw std::runtime_error("epoll_ctl error");
+		order ++;
+
+	}
+
+ 
+	HttpRequest 	httpRequest;
+	time_t servtimeOut = time(0) + 10;
+	while (true)
+	{
+		// if(WEBS_DEBUG_RUN_10_SECS && time(0) > serviceExpires)
+		// 	break; 
+
+		//nfds = epoll_wait(int epfd, struct epoll_event *events, int maxevents, int timeout);
+		int nfds = epoll_wait(epoll_fd, events, SERV_MAX_EVENTS, SERV_WAIT_TIMEOUT);
+		// try to continue
+		if(nfds == 0)
+			continue;
+		// nfds error
+		if (ndfs == -1)
+			throw std::runtime_error("Error epoll_wait" + std::string(strerror(errno)));
+		for (int i=0; i < nfds; i++)
+		{
+			int activeFd = events[i].data.fd;
+			ServerConfig *server = cm.getServers(events[i].data.fd)
+			std::cout<<"Epoll event active od fd"<< activeFd <<std::endl;
+
+
+			//check server fds
+			if(isServerSocket(activeFd))
+			{
+				// error handling
+				//Generic socket error || Remote shutdown of read stream || Hang-up (e.g. client disconnected)
+				if ((events[i].events & EPOLLERR) || (events[i].events & EPOLLRDHUP) || (events[i].events & EPOLLHUP))
+				{
+					std::cout<<"Error abort listening."<< events[i].data.fd<<std::endl;
+
+					int err_code;
+					socklen_t len = sizeof(err_code);
+					getsockopt(activeFd, SOL_SOCKET, SO_ERROR, &err_code, &len);
+					std::cerr << "getsockopt failed on fd " << activeFd << ": "<< strerror(errno) << std::endl;
+					close(events[i].data.fd);
+					epoll_ctl(epoll_fd, FPOLL_CTL_DEL, events[i].data.fd , NULL);
+					continue;
+				}
+
+				//coming new request
+				{						
+					if(!server)
+						throw std::runtime_error("ERROR Unable to load server configuration for fd....");
+
+					struct sockaddr_in client_addr;	
+					socklen_t lenClientAddr = sizeof(client_addr);
+						
+					int	client_socket = accept(events[i].data.fd, (struct sockaddr *)&client_addr , &lenClientAddr);						
+					if(client_socket < 0)
+						throw std::runtime_error("Unable to accept()" + std::string(strerror(errno)));
+					cm.openConnection(client_socket, *server);
+					continue;
+				}
+			}
+
+			//check client fds
+			{
+					if (cm.findConnection(activeFd) == NULL)
+					{
+						throw std::runtime_error("Unmatched client socket" + std::string(strerror(errno)));
+						continue; 
+					}
+					//cobeam else
+					else
+					{
+
+					}
+
+			}
+
+
+		}
+
+	}
+
+	
+	return(1);
+
+}
 
 
 
