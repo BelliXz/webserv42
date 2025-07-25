@@ -214,6 +214,45 @@ int Server::run()
 
 	}
 
+	// HttpResponse 	httpResponse; 
+	HttpRequest 	httpRequest;
+	time_t servtimeOut = time(0) + 10;
+	while (true)
+	{
+		// if(WEBS_DEBUG_RUN_10_SECS && time(0) > serviceExpires)
+		// 	break; 
+
+		//nfds = epoll_wait(int epfd, struct epoll_event *events, int maxevents, int timeout);
+		int nfds = epoll_wait(epoll_fd, events, SERV_MAX_EVENTS, SERV_WAIT_TIMEOUT);
+		// try to continue
+		if(nfds == 0)
+			continue;
+		// nfds error
+		if (ndfs == -1)
+			throw std::runtime_error("Error epoll_wait" + std::string(strerror(errno)));
+		for (int i=0; i < nfds; i++)
+		{
+			int activeFd = events[i].data.fd;
+			ServerConfig *server = cm.getServers(events[i].data.fd)
+			std::cout<<"Epoll event active od fd"<< activeFd <<std::endl;
+
+
+			//check server fds
+			if(isServerSocket(activeFd))
+			{
+
+			}
+
+			//check client fds
+			{
+				
+			}
+
+
+		}
+
+	}
+
 	
 	return(1);
 
