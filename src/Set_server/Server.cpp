@@ -256,7 +256,19 @@ int Server::run()
 				}
 
 				//coming new request
-
+				{						
+					if(!server)
+						throw std::runtime_error("ERROR Unable to load server configuration for fd....");
+									
+					struct sockaddr_in client_address;	
+					socklen_t len = sizeof(client_address);
+						
+					int	client_socket = accept(events[i].data.fd, (struct sockaddr *)&client_address , &len);						
+					if(client_socket < 0)
+						throw std::runtime_error("Unable to accept()");
+				//	cm.openConnection(client_socket, *server);
+					continue;
+				}
 			}
 
 			//check client fds
