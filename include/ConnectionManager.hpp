@@ -29,9 +29,9 @@ class ConnectionManager
 
 		static int					epollFd; 
 
-		// Connection 					*findConnection(int socket);
+		Connection 					*findConnection(int socket);
 		bool						closeConnection(int socket);
-		// int							openConnection(int socket, ServerConfig config);
+		int							openConnection(int socket, ServerConfig config);
 
 		// bool						handleRead(int clientSocket);
 		// bool						handleWrite(int clientSocket);

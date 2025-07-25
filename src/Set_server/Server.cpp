@@ -214,7 +214,7 @@ int Server::run()
 
 	}
 
-	// HttpResponse 	httpResponse; 
+ 
 	HttpRequest 	httpRequest;
 	time_t servtimeOut = time(0) + 10;
 	while (true)
@@ -259,20 +259,30 @@ int Server::run()
 				{						
 					if(!server)
 						throw std::runtime_error("ERROR Unable to load server configuration for fd....");
-									
-					struct sockaddr_in client_address;	
-					socklen_t len = sizeof(client_address);
+
+					struct sockaddr_in client_addr;	
+					socklen_t lenClientAddr = sizeof(client_addr);
 						
-					int	client_socket = accept(events[i].data.fd, (struct sockaddr *)&client_address , &len);						
+					int	client_socket = accept(events[i].data.fd, (struct sockaddr *)&client_addr , &lenClientAddr);						
 					if(client_socket < 0)
-						throw std::runtime_error("Unable to accept()");
-				//	cm.openConnection(client_socket, *server);
+						throw std::runtime_error("Unable to accept()" + std::string(strerror(errno)));
+					cm.openConnection(client_socket, *server);
 					continue;
 				}
 			}
 
 			//check client fds
 			{
+					if (cm.findConnection(activeFd) == NULL)
+					{
+						throw std::runtime_error("Unmatched client socket" + std::string(strerror(errno)));
+						continue; 
+					}
+					//cobeam else
+					else
+					{
+
+					}
 
 			}
 

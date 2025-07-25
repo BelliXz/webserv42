@@ -30,6 +30,30 @@ std::map<int, ServerConfig> ConnectionManager::getServers()
 	return servers;
 }
 
+int		ConnectionManager::openConnection(int clientSocket, ServerConfig serverConfig)
+{
+
+	int flags = fcntl(clientSocket, F_GETFL, 0);
+	if (flags < 0 || fcntl(clientSocket, F_SETFL, flags | O_NONBLOCK) < 0) 
+	{
+		std::cerr << "CAN NOT ACCEPTED SOCKET TO NON-BLOCK MODE : " << clientSocket << strerror(errno) << std::endl;
+		close(clientSocket);
+		return (-1);
+	}
+
+	connections[ clientSocket ] = Connection(clientSocket, serverConfig);
+	connections[ clientSocket ].clear();
+
+	// register to epoll
+	epoll_event  event; 
+	event.events = EPOLLIN;	
+	event.data.fd = clientSocket;
+	epoll_ctl(epollSocket,  EPOLL_CTL_ADD, clientSocket , &event);
+	std::cout<<"Accepting client connection "<< client_addr <<" reigistered into epoll."<<std::endl;
+	
+	return connections.size();
+}
+
 bool	ConnectionManager::closeConnection(int clientSocket)
 {		
 	// Logger::log(LC_MINOR_NOTE, "Closing client socket #%d, unregistererd from epoll", clientSocket);
@@ -62,4 +86,12 @@ int	 ConnectionManager::getEpollFd()
 {
 
 	return (epollFd);
+}
+
+Connection *ConnectionManager::findConnection(int socket)
+{
+	std::map<int,Connection>::iterator it = connections.find(socket);
+	if(it != connections.end())
+		return &(it->second);	
+	return (NULL);
 }

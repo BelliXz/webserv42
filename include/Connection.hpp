@@ -36,21 +36,21 @@ class Connection {
 		bool 					keepAlive;
 		
 	public:
-		Connection();
-		Connection(int socket, const ServerConfig& config);
-		Connection(const Connection& other);
-		Connection& operator=(const Connection& other);
+		// Connection();
+		// Connection(int socket, const ServerConfig& config);
+		// Connection(const Connection& other);
+		// Connection& operator=(const Connection& other);
 		
-		int getSocket() const;
-		time_t getLastActivityTime() const;
-		bool hasDataToWrite() const;
-		const std::string& getResponse() const;
-		void clearResponse(size_t bytes);
-		void RequestCutOffBody(const std::string& headers, std::vector<char>& requestBodyBin);
-		bool appendRequestData(const std::string& data, int socket);
-		void setBodyBin(std::vector<char> body, std::string& header);
-		void processRequest();
-		void updateLastActivity();
+		// int getSocket() const;
+		// time_t getLastActivityTime() const;
+		// bool hasDataToWrite() const;
+		// const std::string& getResponse() const;
+		// void clearResponse(size_t bytes);
+		// void RequestCutOffBody(const std::string& headers, std::vector<char>& requestBodyBin);
+		// bool appendRequestData(const std::string& data, int socket);
+		// void setBodyBin(std::vector<char> body, std::string& header);
+		// void processRequest();
+		// void updateLastActivity();
 };
 
 #endif
