@@ -240,12 +240,28 @@ int Server::run()
 			//check server fds
 			if(isServerSocket(activeFd))
 			{
+				// error handling
+				//Generic socket error || Remote shutdown of read stream || Hang-up (e.g. client disconnected)
+				if ((events[i].events & EPOLLERR) || (events[i].events & EPOLLRDHUP) || (events[i].events & EPOLLHUP))
+				{
+					std::cout<<"Error abort listening."<< events[i].data.fd<<std::endl;
+
+					int err_code;
+					socklen_t len = sizeof(err_code);
+					getsockopt(activeFd, SOL_SOCKET, SO_ERROR, &err_code, &len);
+					std::cerr << "getsockopt failed on fd " << activeFd << ": "<< strerror(errno) << std::endl;
+					close(events[i].data.fd);
+					epoll_ctl(epoll_fd, FPOLL_CTL_DEL, events[i].data.fd , NULL);
+					continue;
+				}
+
+				//coming new request
 
 			}
 
 			//check client fds
 			{
-				
+
 			}
 
 
