@@ -108,6 +108,14 @@ void Server::printServerConfigs(const std::vector<ServerConfig>& servers)
 	}
 }
 
+bool	Server::isServerSocket(int socket)
+{
+	for (std::vector<int>::iterator it = serverSockets.begin(); it != serverSockets.end(); ++it)
+		if (*it == socket)
+			return (true);
+	return (false);
+}
+
 bool Server::start(ConnectionManager& cm)
 {
     std::cout<< "<<<<<<<<<<   Server start   >>>>>>>>>>"<<std::endl;
@@ -216,10 +224,11 @@ int Server::run()
 
  
 	HttpRequest 	httpRequest;
-	time_t servtimeOut = time(0) + 10;
+	//time_t servtimeout = time(0) + 10;
 	while (true)
 	{
-		// if(WEBS_DEBUG_RUN_10_SECS && time(0) > serviceExpires)
+		//if(WEBS_DEBUG_RUN_10_SECS && time(0) > serviceExpires)
+		// if(time(0) > servtimeout)
 		// 	break; 
 
 		//nfds = epoll_wait(int epfd, struct epoll_event *events, int maxevents, int timeout);
@@ -228,18 +237,19 @@ int Server::run()
 		if(nfds == 0)
 			continue;
 		// nfds error
-		if (ndfs == -1)
+		if (nfds == -1)
 			throw std::runtime_error("Error epoll_wait" + std::string(strerror(errno)));
 		for (int i=0; i < nfds; i++)
 		{
 			int activeFd = events[i].data.fd;
-			ServerConfig *server = cm.getServers(events[i].data.fd)
-			std::cout<<"Epoll event active od fd"<< activeFd <<std::endl;
+			ServerConfig *server = cm.getServer(events[i].data.fd);
+			std::cout<<"Epoll event active fd"<< activeFd <<std::endl;
 
 
 			//check server fds
 			if(isServerSocket(activeFd))
 			{
+				std::cout<< "<<<<<<<<<<   Servers checking...   >>>>>>>>>"<<std::endl;
 				// error handling
 				//Generic socket error || Remote shutdown of read stream || Hang-up (e.g. client disconnected)
 				if ((events[i].events & EPOLLERR) || (events[i].events & EPOLLRDHUP) || (events[i].events & EPOLLHUP))
@@ -251,7 +261,7 @@ int Server::run()
 					getsockopt(activeFd, SOL_SOCKET, SO_ERROR, &err_code, &len);
 					std::cerr << "getsockopt failed on fd " << activeFd << ": "<< strerror(errno) << std::endl;
 					close(events[i].data.fd);
-					epoll_ctl(epoll_fd, FPOLL_CTL_DEL, events[i].data.fd , NULL);
+					epoll_ctl(epoll_fd, EPOLL_CTL_DEL, events[i].data.fd , NULL);
 					continue;
 				}
 
@@ -273,6 +283,7 @@ int Server::run()
 
 			//check client fds
 			{
+				std::cout<< "<<<<<<<<<<   Clients checking...   >>>>>>>>>"<<std::endl;
 					if (cm.findConnection(activeFd) == NULL)
 					{
 						throw std::runtime_error("Unmatched client socket" + std::string(strerror(errno)));

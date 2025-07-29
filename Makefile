@@ -17,6 +17,7 @@ HEADER		=	./include/ConfigParser.hpp \
 				./include/HttpRequest.hpp \
 				./include/RouteConfig.hpp \
 				./include/ServerConfig.hpp \
+				./include/Connection.hpp \
 				./include/ConnectionManager.hpp\
 				./include/Server.hpp 
 
@@ -24,6 +25,7 @@ HEADER		=	./include/ConfigParser.hpp \
 SRC_FILES	=	./src/main.cpp \
 				./src/Run_server/HttpRequest.cpp \
 				./src/Run_server/ConfigParser.cpp \
+				./include/Connection.cpp \
 				./src/Set_server/RouteConfig.cpp \
 				./src/Set_server/ServerConfig.cpp \
 				./src/Set_server/Server.cpp \

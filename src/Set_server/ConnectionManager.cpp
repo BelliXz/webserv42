@@ -48,8 +48,8 @@ int		ConnectionManager::openConnection(int clientSocket, ServerConfig serverConf
 	epoll_event  event; 
 	event.events = EPOLLIN;	
 	event.data.fd = clientSocket;
-	epoll_ctl(epollSocket,  EPOLL_CTL_ADD, clientSocket , &event);
-	std::cout<<"Accepting client connection "<< client_addr <<" reigistered into epoll."<<std::endl;
+	epoll_ctl(epollFd,  EPOLL_CTL_ADD, clientSocket , &event);
+	std::cout<<"Accepting client connection "<< clientSocket <<" reigistered into epoll."<<std::endl;
 	
 	return connections.size();
 }
