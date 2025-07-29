@@ -244,7 +244,7 @@ void ConfigParser::printConfigParser(const std::vector<ServerConfig>& servers)
 			{
 				std::cout << "    Return: " << route.getReturnStatus() << " => " << route.getReturnValue() << "\n";
 			}
-		}
+		} 
 		std::cout << "\n";
 	}
 }

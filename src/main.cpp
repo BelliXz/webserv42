@@ -2,13 +2,14 @@
 #include "../include/Server.hpp"
 #include "../include/HttpRequest.hpp"
 
+#include "Server.hpp"
 #include <iostream>
 #include <exception>
 #include <signal.h>
 
 int main(int argc, char **argv)
 {
-    try{
+    // try{
 
     if (argc != 2) 
     {
@@ -17,18 +18,18 @@ int main(int argc, char **argv)
     }
 
 
-    std::cout <<RED "\n\n===== test1 parse config (GET format)=====\n" RESET;
-    signal(SIGPIPE, SIG_IGN);
-    // Server     Server(config);  
-    // Server.run();
-    //Server::printServerConfigs(Server.getServerConfigs());
+//     std::cout <<RED "\n\n===== test1 parse config (GET format)=====\n" RESET;
+//     signal(SIGPIPE, SIG_IGN);
+//    // Server     Server(config);  
+//    // Server.run();
+//     Server::printServerConfigs(Server.getServerConfigs());
 
-    }
+//     }
 
-    catch(std::exception &e)
-	{
-		//std::cout << LC_ERROR << "Error: " << e.what() << LC_RESET << std::endl;
-	}
+//     catch(std::exception &e)
+// 	{
+// 	//	std::cout << LC_ERROR << "Error: " << e.what() << LC_RESET << std::endl;
+// 	}
     
 
     // std::cout <<RED "\n\n===== test2 parse config (Free style)=====\n" RESET;
@@ -40,6 +41,13 @@ int main(int argc, char **argv)
 	// 	exit(EXIT_FAILURE);
 	// }
     // ConfigParser::printConfigParser(serverConfigs);
+
+    signal(SIGPIPE, SIG_IGN);
+    Server     webserver(argv[1]);
+    // ConfigParser::printConfigParser(webserver.getServerConfigs());
+    webserver.run();
+
+
 
 
 

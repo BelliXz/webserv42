@@ -10,6 +10,22 @@
 # define RESET  "\033[0m"
 # define RED 	"\033[0;31m"
 
+
+
+# define BOLD 	"\033[1m"
+# define RED 	"\033[0;31m"
+# define GREEN 	"\033[0;32m"
+# define BLUE	"\033[0;34m"
+# define CYAN 	"\033[0;36m"
+# define GRAY 	"\033[0;37m"
+# define LRED 	"\033[0;91m"
+# define YELLOW	"\033[0;33m"
+# define MAGENTA "\033[0;35m" 
+# define RESET  "\033[0m"
+# define RGB 	"\033[1m\033[38;2;255;182;193m"
+
+
+
 class RouteConfig 
 {
 	private:

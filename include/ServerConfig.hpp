@@ -10,6 +10,7 @@ class ServerConfig
 {
 	private:
 		int 								port;
+		int 								portFd; // kit add
 		std::string 						serverName;
 		std::string 						host;
 		std::string 						root;
@@ -21,6 +22,8 @@ class ServerConfig
 	public:
 		ServerConfig();
 
+		void setPortFd(int fd) { portFd = fd; }	// kit ad
+		int getPortFd() const { return portFd; } // kit add
 
 		int 		getPort() const;
 		std::string getServerName() const;
