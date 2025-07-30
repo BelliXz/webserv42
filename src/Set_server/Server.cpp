@@ -219,21 +219,6 @@ int Server::run()
 		throw std::runtime_error("Error creating epoll instance");
 	struct epoll_event		events[SERV_MAX_EVENTS];
 	memset( events, 0 , sizeof(events));
-	
-
-	// // kit add  original
-	// //add server fds into the epoll_events
-	// int order = 0; 
-	// for ( std::vector<int>::iterator it = serverSockets.begin(); it != serverSockets.end(); ++it)
-	// {
-	// 	events[order].events = EPOLLIN;	
-	// 	events[order].data.fd = *it;
-	// 	if(epoll_ctl(epoll_fd, EPOLL_CTL_ADD , *it , &events[order] ) < 0)
-	// 		throw std::runtime_error("epoll_ctl error");
-	// 	// kit add  pls check
-	// 	order ++;
-	// }
-
 
 	// kit add
 	std::map<int, ServerConfig*> serverFdMap;
@@ -245,7 +230,7 @@ int Server::run()
 		if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, fd, &events[i]) < 0)
 			throw std::runtime_error("epoll_ctl error");
 	
-		// ✅ map fd กับ ServerConfig
+		//  map fd กับ ServerConfig
 		for (size_t j = 0; j < serverconfigs.size(); ++j)
 		{
 			if (serverconfigs[j].getPortFd() == fd)
@@ -313,22 +298,18 @@ int Server::run()
 				{						
 					if(!server)
 					{
-						// kit add
+						// kit fixed for debug
 						std::cout<<RED;
 						std::cerr << "No server fd: " << activeFd << std::endl;
 						std::cout<<RED << RESET;
 						throw std::runtime_error("ERROR Unable to load server configuration for fd....");
 					}
-					else // kit add
+					else // kit add for debug
 					{
 						std::cout<<GREEN;
 						std::cout<<"Nave server: " << server->getServerName() << std::endl;
 						std::cout<<"Listening on port: " << server->getPort() << std::endl;
 						std::cout << "fd: " << activeFd << std::endl;
-						// std::cout<<"Root: " << server->getRoot() << std::endl;
-						// std::cout<<"Index: " << server->getIndex() << std::endl;
-						// std::cout<<"Client Max Body Size: " << server->getClientMaxBodySize() << std::endl;
-						// std::cout<<"Error Pages: " << std::endl;
 						std::cout<<GREEN << RESET;
 					}
 					struct sockaddr_in client_addr;	
@@ -344,24 +325,24 @@ int Server::run()
 
 			// check client fds
 			{
-				close (activeFd); // kit add
-				// std::cout<< "<<<<<<<<<<   Clients checking...   >>>>>>>>>"<<std::endl;
-				// 	if (cm.findConnection(activeFd) == NULL)
-				// 	{
-				// 		throw std::runtime_error("Unmatched client socket" + std::string(strerror(errno)));
-				// 		continue; 
-				// 	}
-				// 	//cobeam else
-				// 	else
-				// 	{
+				//close (activeFd); // kit add
+				std::cout<< "<<<<<<<<<<   Clients checking...   >>>>>>>>>"<<std::endl;
+					if (cm.findConnection(activeFd) == NULL)
+					{
+						throw std::runtime_error("Unmatched client socket" + std::string(strerror(errno)));
+						continue; 
+					}
+					//cobeam  cotinuce else
+					else
+					{
+						std::cout<<"cobeams"<<std::endl;
 
-				// 	}
+					}
 
 			}
 
-
+			close (activeFd); // kit add
 		}
-
 	}
 
 	
