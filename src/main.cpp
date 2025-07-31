@@ -9,7 +9,7 @@
 
 int main(int argc, char **argv)
 {
-    // try{
+    try{
 
     if (argc != 2) 
     {
@@ -46,7 +46,12 @@ int main(int argc, char **argv)
     Server     webserver(argv[1]);
     // ConfigParser::printConfigParser(webserver.getServerConfigs());
     webserver.run();
-
+    }
+    catch (const std::exception& e) 
+    {
+        std::cerr << "[" << "ERROR" << "] "  << e.what() << std::endl;
+        return 1;
+    }   
 
 
 

@@ -36,15 +36,15 @@ class ConnectionManager
 		// bool						handleRead(int clientSocket);
 		// bool						handleWrite(int clientSocket);
 
-		// int							addServer(int socket, ServerConfig server);
-		ServerConfig				*getServer(int socket);
+		//int							addServer(int socket, ServerConfig server);
+		//ServerConfig				*getServer(int socket);
 		std::map<int, ServerConfig> getServers(); 
 
 
 
-		// size_t						purgeExpiredConnections();
+		size_t						checkTimeExpiedConnection();
 		//bool 						handleRequestException(RequestException &reqException,Connection &conn);
-		//void						debug();
+		void						Info();
 
 		int							addRawServer(ServerConfig server);
 		std::vector<ServerConfig>   getRawServers();

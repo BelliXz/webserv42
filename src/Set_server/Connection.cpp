@@ -12,21 +12,6 @@ Connection::Connection()
 
 }
 
-Connection::Connection(int socket, ServerConfig config):socket(socket), serverConfig(config),isReady(false)
-{
-	bodyLength = 0;
-	contentLength = 0;
-	
-	//expiresOn = time(NULL) + (CON_SOC_TIMEOUT_SECS);
-    int flags = fcntl(socket, F_GETFL, 0);
-	if (flags >= 0) {
-		if( fcntl(socket, F_SETFL, flags | O_NONBLOCK) == -1)
-			throw std::runtime_error("Failed  to set socket to non-blocking mode");
-	}
-	rawPostBody.clear();
-
-
-}
 
 void Connection::clear()
 {
@@ -38,4 +23,31 @@ void Connection::clear()
 	contentLength = 0;
 	bodyLength = 0;
 	
+}
+
+int 	Connection::getSocket() const
+{
+	return (socket);
+}
+
+bool	Connection::isExpired(time_t comp) const
+{
+	return expiresOn < comp;
+}
+
+
+Connection::Connection(int socket, ServerConfig config):socket(socket), serverConfig(config),isReady(false)
+{
+	bodyLength = 0;
+	contentLength = 0;
+	
+	expiresOn = time(NULL) + (10);
+	int flags = fcntl(socket, F_GETFL, 0);
+	if (flags >= 0) {
+		if( fcntl(socket, F_SETFL, flags | O_NONBLOCK) == -1)
+			throw std::runtime_error("Failed  to set socket to non-blocking mode");
+	}
+	rawPostBody.clear();
+
+
 }

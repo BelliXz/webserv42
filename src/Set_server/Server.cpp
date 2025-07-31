@@ -180,7 +180,7 @@ bool Server::start(ConnectionManager& cm)
 			}
 
 
-			// ✅ ตั้งค่า fd ให้กับ ServerConfig
+			// ตั้งค่า fd ให้กับ ServerConfig
 			// ก่อน push fd เข้า serverSockets
 			it->setPortFd(serverSocket); // kit add
 
@@ -245,11 +245,10 @@ int Server::run()
 
  
 	HttpRequest 	httpRequest;
-	//time_t servtimeout = time(0) + 10;
+	//time_t servtimeExpires = time(0) + 10;
 	while (true)
 	{
-		//if(WEBS_DEBUG_RUN_10_SECS && time(0) > serviceExpires)
-		// if(time(0) > servtimeout)
+		// if(time(0) > servtimeExpires)
 		// 	break; 
 
 		//nfds = epoll_wait(int epfd, struct epoll_event *events, int maxevents, int timeout);
@@ -343,9 +342,11 @@ int Server::run()
 
 			close (activeFd); // kit add
 		}
+		//Connectionmanager.checkTimeExpiedConnection();
 	}
 
-	
+
+	close(epoll_fd);
 	return(1);
 
 }

@@ -16,15 +16,7 @@ ConnectionManager::~ConnectionManager()
 }
 
 
-ServerConfig	*ConnectionManager::getServer(int fd)
-{
-	for( std::map<int, ServerConfig>::iterator it = servers.begin(); it != servers.end(); ++it)
-	{
-		if(fd == it->first)
-		return &(it->second);
-	}
-	return NULL;
-}
+
 std::map<int, ServerConfig> ConnectionManager::getServers()
 {
 	return servers;
@@ -88,10 +80,39 @@ int	 ConnectionManager::getEpollFd()
 	return (epollFd);
 }
 
+void ConnectionManager::Info()
+{
+	std::cout << "\n==========================\nConnectionController\n==========================" << std::endl;
+	std::cout << " -rawServers " << std::endl;
+	for( std::vector<ServerConfig>::iterator it = rawServers.begin(); it != rawServers.end(); ++it)
+	{
+		std::cout << " server port " << it->getPort() << std::endl; 
+		std::cout << " server name " << it->getServerName() << std::endl; 
+	}
+}
+
+
 Connection *ConnectionManager::findConnection(int socket)
 {
 	std::map<int,Connection>::iterator it = connections.find(socket);
 	if(it != connections.end())
 		return &(it->second);	
 	return (NULL);
+}
+
+size_t	ConnectionManager::checkTimeExpiedConnection()
+{
+	time_t		now = time(NULL);
+	size_t 		count = 0;
+
+	for ( std::map<int, Connection>::iterator it = connections.begin(); it != connections.end(); ++it)
+	{
+		if(it->second.isExpired(now) )
+		{
+			std::cout<<"Connection " <<it->second.getSocket()<<"timeout, closing connection and remove from epoll" <<std::endl;
+			closeConnection(it->second.getSocket());
+			count ++;
+		}
+	}
+	return (count);
 }

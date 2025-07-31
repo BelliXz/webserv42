@@ -20,7 +20,7 @@
 class Connection {
 	private:
 		int					socket;	
-		//time_t				expiresOn; 
+		time_t				expiresOn; 
 		ServerConfig		serverConfig;
 		bool				isReady;
 		int					bodyLength;
@@ -39,6 +39,8 @@ class Connection {
 		Connection(int socket, ServerConfig config);
 
 		void 				clear();
+		int 				getSocket() const;
+		bool				isExpired(time_t comp) const;
 
 };
 
