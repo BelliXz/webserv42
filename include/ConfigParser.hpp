@@ -11,12 +11,20 @@
 #include <algorithm>
 #include <set>        
 
+
+
 class ConfigParser
 {
 	public:
 		static std::vector<ServerConfig> parseAllConfigs		  (const std::string& configFilePath);
 		static bool 					 checkErrorParseAllConfigs(const std::vector<ServerConfig>& servers);
-		static void 					 printConfigParser		  (const std::vector<ServerConfig>& servers) ;
+		static void 					 printAllServerConfig		  (const std::vector<ServerConfig>& servers) ;
+
+
+		static void 					 printSelectedServer(const ServerConfig* s);
+
+
+		
 };
 
 

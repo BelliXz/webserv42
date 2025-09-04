@@ -1,14 +1,9 @@
 #ifndef CONNECTION_MANAGER_HPP
 #define CONNECTION_MANAGER_HPP
 
-# include 	<map>
-# include	<unistd.h>
-# include	<string.h>
-# include	<cstring>
-# include 	"Connection.hpp"
-# include 	"ServerConfig.hpp"
 
-//#define CONNECTION_TIMEOUT 60
+
+# include 	"Connection.hpp"
 
 class Connection;
 class ConnectionManager 
@@ -41,6 +36,8 @@ class ConnectionManager
 		std::map<int, ServerConfig> getServers(); 
 
 
+		
+
 
 		// size_t						purgeExpiredConnections();
 		//bool 						handleRequestException(RequestException &reqException,Connection &conn);
@@ -51,6 +48,12 @@ class ConnectionManager
 
 		static void					setEpollFd(int epollscoket);
 		static  int					getEpollFd();
+
+
+
+		bool						read(int clientSocket);
+		
+		bool						write(int clientSocket);
 
 };
 

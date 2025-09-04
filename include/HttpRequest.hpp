@@ -10,24 +10,25 @@
 #include <cstdlib>  
 #include <iomanip>
 
-# define RED 	"\033[0;31m"
-# define GREEN 	"\033[0;32m" 
-# define RESET  "\033[0m"
+#include "RouteConfig.hpp"
+
 
 class HttpRequest 
 {
     public:
-        std::string                         request;        // kit add original request
+        std::string                         request;       
         std::string                         method;             
-        std::string 			            rawPath;        // Get add
+        std::string 			            rawPath;        
         std::string                         path;                      
         std::string                         filename;                   
-        std::string				            rawQueryString; // Get add
+        std::string				            rawQueryString;
         std::string                         query;                    
-        std::map<std::string, std::string> 	queryStrings;   // Get add
+        std::map<std::string, std::string> 	queryStrings;   
         std::string                         version;                   
-        std::string                         afterVersion;   // kit add check error
-        std::map<std::string, std::string>  headers;       
+        std::string                         afterVersion;   
+        std::map<std::string, std::string>  headers;        
+        std::string                         host;           
+        int                                 port;           
         size_t                              contentLength;  
         std::string                         contenttype;              
         std::string                         cookie;                   

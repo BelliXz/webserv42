@@ -3,21 +3,7 @@
 #define Server_HPP
 
 #include "ConfigParser.hpp"
-#include "ServerConfig.hpp"
 #include "ConnectionManager.hpp"
-#include 	<iostream>
-#include 	<vector>
-#include 	<algorithm>
-#include 	<set>
-#include 	<sys/socket.h>
-#include	<netinet/in.h>
-#include	<sys/epoll.h>
-#include 	<fcntl.h>
-#include 	<string>
-#include 	<signal.h>
-#include 	<cstring>
-
-
 
 #define 	SERV_MAX_CONNS  	100
 #define		SERV_MAX_EVENTS 	1042
@@ -32,7 +18,8 @@ class Server
 		std::vector<int>			serverSockets;		
 		std::vector<ServerConfig>	serverconfigs;	
 		std::string					configFile;
-		ConnectionManager			Connectionmanager;
+		// ConnectionManager			connectionmanager;
+		ConnectionManager			cm;
 
 		size_t	parseConfig(std::string config_file);
 		
@@ -55,9 +42,15 @@ class Server
 
 		std::vector<ServerConfig>& GetServerConfigs();
 
-		// add 2 ft
 		const std::vector<ServerConfig>& getServerConfigs() const ;
 		static void printServerConfigs(const std::vector<ServerConfig>& servers) ;
+
+
+
+
+
+		// static void printRoutes(const std::map<std::string, RouteConfig>& routes);
+		// RouteConfig selectServerAndRoute(HttpRequest& request, ServerConfig& server, std::string& fullPath);
 };
 
 

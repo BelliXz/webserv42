@@ -10,7 +10,7 @@ class ServerConfig
 {
 	private:
 		int 								port;
-		int 								portFd; // kit add
+		int 								portFd;
 		std::string 						serverName;
 		std::string 						host;
 		std::string 						root;
@@ -22,8 +22,8 @@ class ServerConfig
 	public:
 		ServerConfig();
 
-		void setPortFd(int fd) { portFd = fd; }	// kit ad
-		int getPortFd() const { return portFd; } // kit add
+		void setPortFd(int fd) { portFd = fd; }	
+		int getPortFd() const { return portFd; } 
 
 		int 		getPort() const;
 		std::string getServerName() const;
@@ -42,10 +42,10 @@ class ServerConfig
 		void setIndex(const std::string& i);
 		void setClientMaxBodySize(size_t size) ;
 
-		void setErrorPages(const std::map<int, std::string>& errorPages);	//check Get
-		void setRoutes(const std::map<std::string, RouteConfig>& routes);	//check Get
+		void setErrorPages(const std::map<int, std::string>& errorPages);	
+		void setRoutes(const std::map<std::string, RouteConfig>& routes);	
 	
-		void addRoute(const RouteConfig& routeConfig);						//check Get   //addRoute overload
+		void addRoute(const RouteConfig& routeConfig);						
 		void addRoute(const std::string& path, const RouteConfig& route);
 		void addErrorPage(int code, const std::string& path);
 

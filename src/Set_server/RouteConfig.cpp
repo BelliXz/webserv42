@@ -11,11 +11,24 @@ const std::vector<std::string>& RouteConfig::getMethods() const 		{ return allow
 
 
 const std::map<std::string, std::string>& RouteConfig::getCGIs() const 	{ return CGIs; }
+
+
+
 std::string RouteConfig::getCGI(std::string ext)
 {
-	if(CGIs.find(ext) != CGIs.end())
-		return CGIs[ext];
-	return "";
+    if (!ext.empty() && ext[0] != '.')
+        ext = "." + ext;
+
+    std::map<std::string, std::string>::const_iterator it = CGIs.find(ext);
+    if (it != CGIs.end())
+    {
+        std::string cmd = it->second;
+
+        if (!cmd.empty() && cmd[cmd.size() - 1] == ';')
+            cmd.resize(cmd.size() - 1);
+        return cmd;
+    }
+    return "";
 }
 
 
@@ -44,4 +57,38 @@ void RouteConfig::setReturn		(int status, const std::string& target)
 {
 	returnStatus = status;
 	returnValue = target;
+}
+
+
+void RouteConfig::printRouteConfig(const RouteConfig &route) {
+    std::cout << "======= RouteConfig::printRouteConfig 81 ========\n";
+    std::cout << SERVER_COLOR << "---- RouteConfig::printRouteConfig ----" << RESET << std::endl;
+    std::cout << SERVER_COLOR << "  Path: " << route.getPath() << SERVER_COLOR << RESET << "\n";
+		std::cout << "    Root: " << route.getRoot() << "\n";
+		std::cout << "    Index: " << route.getIndex() << "\n";
+		std::cout << "    Autoindex: " << (route.getAutoindex() ? "on" : "off") << "\n";
+		std::cout << "    Client Max Body Size: " << route.getClientMaxBodySize() << "\n";
+		std::cout << "    Upload Store: " << route.getUploadStore() << "\n";
+		// Allowed Methods
+		std::cout << "    Allow Methods: ";
+		const std::vector<std::string>& methods = route.getMethods();
+		for (size_t j = 0; j < methods.size(); ++j) 
+		{
+			std::cout << methods[j];
+			if (j + 1 < methods.size()) std::cout << ", ";
+		}
+		std::cout << "\n";
+		// CGI Map
+		std::cout << "    CGI Passes:\n";
+		const std::map<std::string, std::string>& cgis = route.getCGIs();
+		for (std::map<std::string, std::string>::const_iterator cit = cgis.begin(); cit != cgis.end(); ++cit) 
+		{
+			std::cout << "      " << cit->first << " => " << cit->second << "\n";
+		}
+		// Return Directive
+		if (route.getReturnStatus() != 0) 
+		{
+			std::cout << "    Return: " << route.getReturnStatus() << " => " << route.getReturnValue() << "\n";
+		}
+    std::cout << "---------------------" << std::endl;
 }

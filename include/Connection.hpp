@@ -1,20 +1,10 @@
 #ifndef CONNECTION_HPP
 #define CONNECTION_HPP
 
-#include <string>
-#include <ctime>
 #include "ServerConfig.hpp"
 #include "HttpRequest.hpp"
-//#include "HttpResponse.hpp"
-# include	<ctime>
-# include 	<cstdio>
-# include	<fcntl.h>
-# include	<stdexcept>
-# include	<string>
-# include 	<errno.h>
-# include 	<sys/epoll.h>
-# include 	<sstream>
-# include 	<unistd.h>
+#include "HttpResponse.hpp"
+#include "ConfigParser.hpp"
 
 
 class Connection {
@@ -22,6 +12,7 @@ class Connection {
 		int					socket;	
 		//time_t				expiresOn; 
 		ServerConfig		serverConfig;
+
 		bool				isReady;
 		int					bodyLength;
 		std::string			boundary;
@@ -34,12 +25,81 @@ class Connection {
 		size_t 				contentLength;
 
 
+		// use appendRequestBufferAndProcess  + handleHttpResponse
+		ServerConfig 		*srvConf;
+		RouteConfig 		*routeConf;
+		std::string 		resolvedPath;
+
+
+
+
 	public:
 		Connection();
 		Connection(int socket, ServerConfig config);
 
 		void 				clear();
 
+
+		std::string 		getResolvedPath(){
+			return (resolvedPath);
+		}
+
+		std::string 		getRequestBuffer() const{
+			return (requestBuffer);
+		}
+
+		int 				getSocket() const{
+			return (socket);
+		}
+		int 				getBodyLength() const{
+			return (bodyLength);
+		}
+
+
+
+		ServerConfig		&getServerConfig(){
+			return serverConfig;
+		}		//////////////////////////////////////
+
+
+		std::string 		getResponseBuffer() const{
+			return (responseBuffer);
+		}
+
+
+		
+	    void prepareResponse(const HttpResponse &response) {
+	        responseBuffer = response.ResponseToString();
+	    }
+
+
+
+	    void sendResponse() {
+	        if (!responseBuffer.empty()) {
+	            send(socket,
+	                 responseBuffer.c_str(),
+	                 responseBuffer.size(),
+	                 MSG_DONTWAIT);
+	        }
+	    }
+
+
+		void printConnection() const ;
+
+		bool appendRequestBufferAndProcess(
+			char *buffer,
+			HttpRequest &request,
+			size_t length,
+			std::vector<ServerConfig> &servers
+		);
+
+		bool handleHttpResponse(HttpRequest &request,
+			std::vector<ServerConfig> &servers,
+			size_t length);
+
+		void ready(const HttpResponse &response, bool closeAfterSend);
+
+		// ServerConfig &getServerConfig();
 };
 
 #endif

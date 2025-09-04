@@ -75,6 +75,18 @@ int HttpRequest::parseHttpRequest(char* buffer, HttpRequest& req)
                 req.contenttype = value;
             else if (key == "Cookie")
                 req.cookie = value;
+            else if (key == "Host") 
+            {
+                // host:port
+                size_t colon = value.find(':');
+                if (colon != std::string::npos) {
+                    req.host = value.substr(0, colon);
+                    req.port = std::atoi(value.substr(colon + 1).c_str());
+                } else {
+                    req.host = value;
+                    req.port = 80; // default HTTP
+                }
+            }
         }
     }
 
@@ -105,19 +117,19 @@ int HttpRequest::parseHttpRequest(char* buffer, HttpRequest& req)
 
 void HttpRequest::printHttpRequest(const HttpRequest& req) 
 {
-    std::cout << GREEN << "===== HttpRequest Detail =====\n" << RESET;
-    std::cout << GREEN << "request:" << RESET << "\n"       << req.request         << "\n";
+    std::cout << REQUEST_COLOR << "===== print from 108 HttpRequest::printHttpRequest =====\n" << RESET;
+    std::cout << REQUEST_COLOR << "request:" << RESET << "\n"       << req.request         << "\n";
     std::cout << "\n";
 
-    std::cout << GREEN << std::left << std::setw(22) << "method:" << RESET         << req.method         << "\n";
+    std::cout << REQUEST_COLOR << std::left << std::setw(22) << "method:" << RESET         << req.method         << "\n";
     std::cout << "\n";
 
-    std::cout << GREEN << std::left << std::setw(22) << "rawPath:" << RESET         << req.rawPath        << "\n";
-    std::cout << GREEN << std::left << std::setw(22) << "path:" << RESET            << req.path           << "\n";
-    std::cout << GREEN << std::left << std::setw(22) << "filename:" << RESET        << req.filename       << "\n";
-    std::cout << GREEN << std::left << std::setw(22) << "rawQueryString:" << RESET  << req.rawQueryString << "\n";
-    std::cout << GREEN << std::left << std::setw(22) << "query:" << RESET           << req.query          << "\n";
-    std::cout << GREEN << std::left << std::setw(22) << "queryStrings:" << RESET << "\n";
+    std::cout << REQUEST_COLOR << std::left << std::setw(22) << "rawPath:" << RESET         << req.rawPath        << "\n";
+    std::cout << REQUEST_COLOR << std::left << std::setw(22) << "path:" << RESET            << req.path           << "\n";
+    std::cout << REQUEST_COLOR << std::left << std::setw(22) << "filename:" << RESET        << req.filename       << "\n";
+    std::cout << REQUEST_COLOR << std::left << std::setw(22) << "rawQueryString:" << RESET  << req.rawQueryString << "\n";
+    std::cout << REQUEST_COLOR << std::left << std::setw(22) << "query:" << RESET           << req.query          << "\n";
+    std::cout << REQUEST_COLOR << std::left << std::setw(22) << "queryStrings:" << RESET << "\n";
     for (std::map<std::string, std::string>::const_iterator it = req.queryStrings.begin(); 
         it != req.queryStrings.end(); 
         ++it) 
@@ -127,61 +139,33 @@ void HttpRequest::printHttpRequest(const HttpRequest& req)
     std::cout << "\n";
 
 
-    std::cout << GREEN << std::left << std::setw(22) << "version:" << RESET         << req.version        << "\n";
-    std::cout << GREEN << std::left << std::setw(22) << "afterVersion:" << RESET    << req.afterVersion   << "\n";
+    std::cout << REQUEST_COLOR << std::left << std::setw(22) << "version:" << RESET         << req.version        << "\n";
+    std::cout << REQUEST_COLOR << std::left << std::setw(22) << "afterVersion:" << RESET    << req.afterVersion   << "\n";
     std::cout << "\n";
 
+    std::cout << REQUEST_COLOR << std::left << std::setw(22) << "host:" << RESET    << req.host << "\n";
+    std::cout << REQUEST_COLOR << std::left << std::setw(22) << "port:" << RESET    << req.port << "\n";
+    std::cout << "\n";
 
-    std::cout << GREEN << std::left << std::setw(22) << "headers:" << RESET << "\n";
+    std::cout << REQUEST_COLOR << std::left << std::setw(22) << "headers:" << RESET << "\n";
     for (std::map<std::string, std::string>::const_iterator it = req.headers.begin(); 
         it != req.headers.end(); 
         ++it) 
     {
         std::cout << "  - " << it->first << ": " << it->second << "\n";
     }
-    std::cout << GREEN << std::left << std::setw(22) << "contentLength:" << RESET   << req.contentLength  << "\n";
-    std::cout << GREEN << std::left << std::setw(22) << "contentType:" << RESET     << req.contenttype    << "\n";
-    std::cout << GREEN << std::left << std::setw(22) << "cookie:" << RESET          << req.cookie         << "\n";
+    std::cout << REQUEST_COLOR << std::left << std::setw(22) << "contentLength:" << RESET   << req.contentLength  << "\n";
+    std::cout << REQUEST_COLOR << std::left << std::setw(22) << "contentType:" << RESET     << req.contenttype    << "\n";
+    std::cout << REQUEST_COLOR << std::left << std::setw(22) << "cookie:" << RESET          << req.cookie         << "\n";
     std::cout << "\n";
 
 
-    std::cout << GREEN << std::left << std::setw(22) << "rawBody size:" << RESET << req.rawBody.size() << " bytes\n";
-    std::cout << GREEN << std::left << std::setw(22) << "body:" << RESET << "\n" << req.body << "\n";
+    std::cout << REQUEST_COLOR << std::left << std::setw(22) << "rawBody size:" << RESET << req.rawBody.size() << " bytes\n";
+    std::cout << REQUEST_COLOR << std::left << std::setw(22) << "body:" << RESET << "\n" << req.body << "\n";
 
 
-    std::cout << GREEN << std::left << std::setw(22) << "complete:" << RESET        << (req.complete ? "true" : "false") << "\n";
-    std::cout << GREEN << "===============================\n" << RESET;
+    std::cout << REQUEST_COLOR << std::left << std::setw(22) << "complete:" << RESET        << (req.complete ? "true" : "false") << "\n";
+    std::cout << REQUEST_COLOR << "===============================\n" << RESET;
 
 
-    std::cout << GREEN << std::left << std::setw(18) << "rawBody (hex):" << RESET;
-    for (size_t i = 0; i < req.rawBody.size(); ++i) 
-    {
-        if (i % 16 == 0) std::cout << "\n  ";
-        std::cout << std::hex << std::setw(2) << std::setfill('0') << (int)(unsigned char)req.rawBody[i] << " ";
-    }
-    std::cout << std::dec << "\n";
-    std::cout << GREEN << "===============================\n" << RESET;
-
-
-    
-    std::cout << GREEN << std::left << std::setw(18) << "rawBody (hex):" << RESET   << "\n";
-    for (size_t i = 0; i < req.rawBody.size(); i += 16) 
-    {
-        std::cout << std::hex << std::setw(4) << std::setfill('0') << i << ": ";
-        for (size_t j = 0; j < 16 && i + j < req.rawBody.size(); ++j) 
-        {
-            std::cout << std::hex << std::setw(2) << std::setfill('0') << (int)(unsigned char)req.rawBody[i + j] << " ";
-        }
-        std::cout << " | ";
-        for (size_t j = 0; j < 16 && i + j < req.rawBody.size(); ++j) 
-        {
-            char c = req.rawBody[i + j];
-            std::cout << (std::isprint(c) ? c : '.');
-        }
-        std::cout << "\n";
-    }
-
-    std::cout << std::dec; // reset base
-    std::cout << GREEN << "===============================\n" << RESET;
 }
-

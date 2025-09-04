@@ -5,12 +5,33 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <iostream>
+#include <algorithm>
+#include <set>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <sys/epoll.h>
+#include <fcntl.h>
+#include <signal.h>
+#include <cstring>
+#include <unistd.h>
+#include <ctime>
+#include <cstdio>
+#include <stdexcept>
+#include <string>
+#include <errno.h>
+#include <sstream>
+#include <sys/stat.h>
+#include <fstream>
+#include "RequestException.hpp"
 
-# define GREEN 	"\033[0;32m" 
-# define RESET  "\033[0m"
-# define RED 	"\033[0;31m"
 
-
+# define FD_COLOR 		"\033[0;35m"
+# define REQUEST_COLOR 	"\033[0;34m"
+# define SERVER_COLOR	"\033[0;33m"
+# define MONITOR_COLOR	"\033[0;32m"
+# define ERROR_COLOR	"\033[0;31m"
+# define RESPONSE_COLOR "\033[0;35m"
 
 # define BOLD 	"\033[1m"
 # define RED 	"\033[0;31m"
@@ -23,7 +44,6 @@
 # define MAGENTA "\033[0;35m" 
 # define RESET  "\033[0m"
 # define RGB 	"\033[1m\033[38;2;255;182;193m"
-
 
 
 class RouteConfig 
@@ -73,6 +93,7 @@ class RouteConfig
 		void addCGI(const std::string& ext, const std::string& path);
 		void setReturn(int status, const std::string& target);
 	
+		static void printRouteConfig(const RouteConfig &route) ;
 
 };
 
