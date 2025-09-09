@@ -11,7 +11,7 @@ CC			=	c++
 CFLAGS		=	-Wall -Werror -Wextra -std=c++98 -pedantic
 
 #########################################################
-NAME		=	Server
+NAME		=	webserv
 
 HEADER		=	./include/HttpRequest.hpp \
 				./include/RouteConfig.hpp \
@@ -108,7 +108,7 @@ re: fclean all
 
 t: all clean
 	@echo "$(GREEN)✅ run program$(COLOR_RESET)"
-	./Server $(CONFIG)
+	./$(NAME) $(CONFIG)
 
 
 # ✅ Success expected (2xx)
