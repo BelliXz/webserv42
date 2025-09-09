@@ -16,19 +16,19 @@
 class HttpRequest 
 {
     public:
-        std::string                         request;       
+        std::string                         request;        // kit add original request
         std::string                         method;             
-        std::string 			            rawPath;        
+        std::string 			            rawPath;        // Get add
         std::string                         path;                      
         std::string                         filename;                   
-        std::string				            rawQueryString;
+        std::string				            rawQueryString; // Get add
         std::string                         query;                    
-        std::map<std::string, std::string> 	queryStrings;   
+        std::map<std::string, std::string> 	queryStrings;   // Get add
         std::string                         version;                   
-        std::string                         afterVersion;   
+        std::string                         afterVersion;   // kit add check error
         std::map<std::string, std::string>  headers;        
-        std::string                         host;           
-        int                                 port;           
+        std::string                         host;           // kit add 
+        int                                 port;           // kit add
         size_t                              contentLength;  
         std::string                         contenttype;              
         std::string                         cookie;                   

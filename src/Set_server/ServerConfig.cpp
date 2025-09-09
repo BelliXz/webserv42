@@ -4,6 +4,9 @@
 ServerConfig::ServerConfig() : port(0), clientMaxBodySize(0) {}
 // ServerConfig::ServerConfig() : port(0), host("0.0.0.0"), clientMaxBodySize(1024 * 1024 * 8) {}	// check
 
+void ServerConfig::			setPortFd(int fd) 								{ portFd = fd; }
+int ServerConfig::			getPortFd() const 								{ return portFd; }
+
 
 int ServerConfig::			getPort() const 								{ return port; }
 std::string ServerConfig::	getServerName() const 							{ return serverName; }

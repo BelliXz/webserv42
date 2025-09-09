@@ -1,5 +1,6 @@
 
 #include "ConnectionManager.hpp"
+#include "Server.hpp"
 
 int ConnectionManager::epollFd = 0; 
 
@@ -15,6 +16,27 @@ ConnectionManager::~ConnectionManager()
 		closeConnection(it->first);
 }
 
+int	ConnectionManager::addRawServer(ServerConfig server)
+{
+	rawServers.push_back(server);
+	return rawServers.size();
+}
+
+std::vector<ServerConfig>  ConnectionManager::getRawServers()
+{
+	return rawServers;
+}
+
+void ConnectionManager::setEpollFd(int epollscoket)
+{
+	epollFd = epollscoket;
+}
+
+int	 ConnectionManager::getEpollFd()
+{
+
+	return (epollFd);
+}
 
 ServerConfig	*ConnectionManager::getServer(int fd)
 {
@@ -25,9 +47,31 @@ ServerConfig	*ConnectionManager::getServer(int fd)
 	}
 	return NULL;
 }
+
 std::map<int, ServerConfig> ConnectionManager::getServers()
 {
 	return servers;
+}
+
+
+Connection *ConnectionManager::findConnection(int socket)
+{
+	std::map<int,Connection>::iterator it = connections.find(socket);
+	if(it != connections.end())
+		return &(it->second);	
+	return (NULL);
+}
+
+bool	ConnectionManager::closeConnection(int clientSocket)
+{		
+	// Logger::log(LC_MINOR_NOTE, "Closing client socket #%d, unregistererd from epoll", clientSocket);
+
+	// std::map<int,Connection>::iterator it = connections.find(clientSocket);
+	// epoll_ctl(epollSocket , EPOLL_CTL_DEL , clientSocket, NULL);
+	// close(clientSocket);	
+	// if(it != connections.end())
+	// 	connections.erase(clientSocket);		
+	return (clientSocket);
 }
 
 int		ConnectionManager::openConnection(int clientSocket, ServerConfig serverConfig)
@@ -53,49 +97,6 @@ int		ConnectionManager::openConnection(int clientSocket, ServerConfig serverConf
 	return connections.size();
 }
 
-bool	ConnectionManager::closeConnection(int clientSocket)
-{		
-	// Logger::log(LC_MINOR_NOTE, "Closing client socket #%d, unregistererd from epoll", clientSocket);
-
-	// std::map<int,Connection>::iterator it = connections.find(clientSocket);
-	// epoll_ctl(epollSocket , EPOLL_CTL_DEL , clientSocket, NULL);
-	// close(clientSocket);	
-	// if(it != connections.end())
-	// 	connections.erase(clientSocket);		
-	return (clientSocket);
-}
-
-int	ConnectionManager::addRawServer(ServerConfig server)
-{
-	rawServers.push_back(server);
-	return rawServers.size();
-}
-
-std::vector<ServerConfig>  ConnectionManager::getRawServers()
-{
-	return rawServers;
-}
-
-void ConnectionManager::setEpollFd(int epollscoket)
-{
-	epollFd = epollscoket;
-}
-
-int	 ConnectionManager::getEpollFd()
-{
-
-	return (epollFd);
-}
-
-Connection *ConnectionManager::findConnection(int socket)
-{
-	std::map<int,Connection>::iterator it = connections.find(socket);
-	if(it != connections.end())
-		return &(it->second);	
-	return (NULL);
-}
-
-
 
 bool ConnectionManager::read(int clientSocket)
 {
@@ -103,21 +104,22 @@ bool ConnectionManager::read(int clientSocket)
               << FD_COLOR << clientSocket << RESET << "\n";
 
     Connection *conn = NULL;
-
-    for (std::map<int, Connection>::iterator it = connections.begin(); it != connections.end(); ++it) {
+    for (std::map<int, Connection>::iterator it = connections.begin(); 
+											 it != connections.end(); 
+											 ++it) {
         if (it->first == clientSocket) {
             conn = &(it->second);
 			
 			std::cout << MONITOR_COLOR ;
 			std::cout << "		read 164 (option) call printConnection\n" << RESET;
 			std::cout  << MONITOR_COLOR << RESET;
-            // conn->printConnection();
+            conn->printConnection();
 			
 			ServerConfig const test = conn->getServerConfig();
 			(void)test;
 			std::cout  << MONITOR_COLOR <<" 		read 180 (option) call printSelectedServer \n";
 			std::cout  << MONITOR_COLOR << RESET;
-			// ConfigParser::printSelectedServer(&test);
+			// Server::printSelectedServer(&test);
             break;
         }
     }
@@ -137,17 +139,13 @@ bool ConnectionManager::read(int clientSocket)
     }
 
 
-
-
-
 	HttpRequest     request;
 	request.HttpRequest::parseHttpRequest(buffer, request);
     try {
 		std::cout  << MONITOR_COLOR << "\n\n\nread 189 call append\n" << RESET; 
         bool done = conn->appendRequestBufferAndProcess(buffer,request,bytes,rawServers);
-		
 
-		std::cout  << MONITOR_COLOR << "\n\n\nread 193 call response\n" << RESET; 
+		std::cout  << MONITOR_COLOR << "\n\n\n		read 193 call response\n" << RESET; 
 		conn->handleHttpResponse(request, rawServers, bytes);
 		
 		(void)done;
@@ -165,26 +163,22 @@ bool ConnectionManager::read(int clientSocket)
         // errorResp.setBody(HttpResponse::getErrorPage(e.getStatusCode(), conn->getServerConfig()));
         // conn->ready(errorResp, true);
     }
-
-
-
     return true;
 }
-
 
 
 
 bool	ConnectionManager::write(int clientSocket )
 {
 	Connection *conn = findConnection(clientSocket);
-	(void)conn;
-
 	size_t sendSize = 4096;
-	(void)sendSize;
-
     conn->sendResponse();
+		
+	
+	(void)conn;
+	(void)sendSize;
+	
 	return (true);
-
 }
 
 

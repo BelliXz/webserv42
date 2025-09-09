@@ -1,11 +1,9 @@
 #ifndef CONNECTION_MANAGER_HPP
 #define CONNECTION_MANAGER_HPP
 
-
-
 # include 	"Connection.hpp"
 
-class Connection;
+
 class ConnectionManager 
 {
 	private:
@@ -14,34 +12,13 @@ class ConnectionManager
 		std::map<int, ServerConfig> servers;
 		std::vector<ServerConfig>	rawServers;
 
-		// ConnectionManager(ConnectionManager const &other);
-		// ConnectionManager &operator=(ConnectionManager const &other);
 
 	public:
-		ConnectionManager();		
-		~ConnectionManager();
-		void setConfigs(const std::vector<ServerConfig>& configs);
-
 		static int					epollFd; 
 
-		Connection 					*findConnection(int socket);
-		bool						closeConnection(int socket);
-		int							openConnection(int socket, ServerConfig config);
+		ConnectionManager();		
+		~ConnectionManager();
 
-		// bool						handleRead(int clientSocket);
-		// bool						handleWrite(int clientSocket);
-
-		// int							addServer(int socket, ServerConfig server);
-		ServerConfig				*getServer(int socket);
-		std::map<int, ServerConfig> getServers(); 
-
-
-		
-
-
-		// size_t						purgeExpiredConnections();
-		//bool 						handleRequestException(RequestException &reqException,Connection &conn);
-		//void						debug();
 
 		int							addRawServer(ServerConfig server);
 		std::vector<ServerConfig>   getRawServers();
@@ -49,10 +26,23 @@ class ConnectionManager
 		static void					setEpollFd(int epollscoket);
 		static  int					getEpollFd();
 
+		// int						addServer(int socket, ServerConfig server);
+		ServerConfig				*getServer(int socket);
+		std::map<int, ServerConfig> getServers(); 
 
 
+		Connection 					*findConnection(int socket);
+		bool						closeConnection(int socket);
+		int							openConnection(int socket, ServerConfig config);
+
+
+
+
+
+		//size_t					purgeExpiredConnections();
+		//bool 						handleRequestException(RequestException &reqException,Connection &conn);
+		//void						debug();
 		bool						read(int clientSocket);
-		
 		bool						write(int clientSocket);
 
 };

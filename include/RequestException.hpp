@@ -14,12 +14,12 @@ class RequestException : public std::runtime_error
         RequestException(int code, const std::string &msg)
             : std::runtime_error(msg), statusCode(code), message(msg) {}
 
-
+        // ต้องประกาศ destructor ให้ตรง spec ของ base class
         virtual ~RequestException() _GLIBCXX_NOTHROW {}
 
         int getStatusCode() const { return statusCode; }
         const std::string &getMessage() const { return message; }
 };
 
-#endif
+#endif // REQUESTEXCEPTION_HPP
 

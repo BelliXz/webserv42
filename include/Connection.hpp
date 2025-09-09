@@ -4,13 +4,11 @@
 #include "ServerConfig.hpp"
 #include "HttpRequest.hpp"
 #include "HttpResponse.hpp"
-#include "ConfigParser.hpp"
-
 
 class Connection {
 	private:
 		int					socket;	
-		//time_t				expiresOn; 
+		//time_t			expiresOn; 
 		ServerConfig		serverConfig;
 
 		bool				isReady;
@@ -21,7 +19,7 @@ class Connection {
 		std::string 		responseBuffer;		
 		bool				headerIsCompleted;
 		bool				requestIsCompleted;
-		//int					epollSocket;
+		//int				epollSocket;
 		size_t 				contentLength;
 
 
@@ -39,67 +37,37 @@ class Connection {
 
 		void 				clear();
 
-
-		std::string 		getResolvedPath(){
-			return (resolvedPath);
-		}
-
-		std::string 		getRequestBuffer() const{
-			return (requestBuffer);
-		}
-
-		int 				getSocket() const{
-			return (socket);
-		}
-		int 				getBodyLength() const{
-			return (bodyLength);
-		}
-
-
-
-		ServerConfig		&getServerConfig(){
-			return serverConfig;
-		}		//////////////////////////////////////
-
-
-		std::string 		getResponseBuffer() const{
-			return (responseBuffer);
-		}
+		std::string 		getResolvedPath();
+		std::string 		getRequestBuffer() const;
+		int 				getSocket() const;
+		int 				getBodyLength() const;
+		ServerConfig		&getServerConfig();
+		std::string 		getResponseBuffer() const;
 
 
 		
-	    void prepareResponse(const HttpResponse &response) {
-	        responseBuffer = response.ResponseToString();
-	    }
 
 
 
-	    void sendResponse() {
-	        if (!responseBuffer.empty()) {
-	            send(socket,
-	                 responseBuffer.c_str(),
-	                 responseBuffer.size(),
-	                 MSG_DONTWAIT);
-	        }
-	    }
+		// Helper functions for  appendRequestBufferAndProcess
+		// static ServerConfig* selectServerConfig(std::vector<ServerConfig> &servers, const HttpRequest &req) 
+		// static RouteConfig* 	selectRouteConfig(ServerConfig &server, const std::string &path) 
+		// static std::string 	resolvePath(const RouteConfig &route, const std::string &reqPath) 
+		// static std::string 	extractFileName(const std::string &path, bool containsDot)
+		// static std::string 	getFileExtension(const std::string &filePath)
 
-
+		bool appendRequestBufferAndProcess(char *buffer,HttpRequest &request,size_t length,std::vector<ServerConfig> &servers);
+		
+		bool handleHttpResponse(HttpRequest &request,std::vector<ServerConfig> &servers,size_t length);
+		void ready(const HttpResponse &response, bool closeAfterSend);
+		
 		void printConnection() const ;
 
-		bool appendRequestBufferAndProcess(
-			char *buffer,
-			HttpRequest &request,
-			size_t length,
-			std::vector<ServerConfig> &servers
-		);
 
-		bool handleHttpResponse(HttpRequest &request,
-			std::vector<ServerConfig> &servers,
-			size_t length);
 
-		void ready(const HttpResponse &response, bool closeAfterSend);
 
-		// ServerConfig &getServerConfig();
+	    void prepareResponse(const HttpResponse &response);	// รับ HttpResponse แล้วแปลงเป็น responseBuffer
+	    void sendResponse() ;							 	// ส่งออกไป
 };
 
 #endif

@@ -1,5 +1,6 @@
 
 #include "Connection.hpp"
+#include "Server.hpp"
 
 Connection::Connection()
 {
@@ -25,6 +26,8 @@ Connection::Connection(int socket, ServerConfig config):socket(socket), serverCo
 			throw std::runtime_error("Failed  to set socket to non-blocking mode");
 	}
 	rawPostBody.clear();
+
+
 }
 
 void Connection::clear()
@@ -39,29 +42,24 @@ void Connection::clear()
 	
 }
 
-
-void Connection::printConnection() const {
-	std::cout << "======= Connection::printConnection() 46 ===========\n";
-	std::cout << std::left << std::setw(25) << "Field" << "Value\n";
-	std::cout << std::setw(25) << "Socket" << socket << "\n";
-	std::cout << std::setw(25) << "isReady" << std::boolalpha << isReady << "\n";
-	std::cout << std::setw(25) << "Body Length" << bodyLength << "\n";
-	std::cout << std::setw(25) << "Boundary" << boundary << "\n";
-	std::cout << std::setw(25) << "Request Buffer" << requestBuffer << "\n";
-	std::cout << std::setw(25) << "Raw POST Body Size" << rawPostBody.size() << " bytes\n";
-	std::cout << std::setw(25) << "Response Buffer" << responseBuffer << "\n";
-	std::cout << std::setw(25) << "Header Completed" << std::boolalpha << headerIsCompleted << "\n";
-	std::cout << std::setw(25) << "Request Completed" << std::boolalpha << requestIsCompleted << "\n";
-	std::cout << std::setw(25) << "Content Length" << contentLength << "\n";
-	std::cout << "==================================================\n";
+std::string 		Connection::getResolvedPath()       {    return (resolvedPath);}
+std::string 		Connection::getRequestBuffer() const{    return (requestBuffer);}
+int 				Connection::getSocket() const       {    return (socket);}
+int 				Connection::getBodyLength() const   {    return (bodyLength);}
+ServerConfig		&Connection::getServerConfig(){
+    // if(serverConfig.getPort() != 0)
+    // 	return &serverConfig;
+    // return  NULL ; 
+    return serverConfig;
 }
+std::string 		Connection::getResponseBuffer() const{  return (responseBuffer);}
 
 
 
 
 
-ServerConfig* selectServerConfig(std::vector<ServerConfig> &servers, const HttpRequest &req) {
-
+//  Helper functions for  appendRequestBufferAndProcess
+static ServerConfig* selectServerConfig(std::vector<ServerConfig> &servers, const HttpRequest &req) {
     (void)req;
     std::cout << "		ft selectServerConfig 107 req.port = " << SERVER_COLOR <<req.port << RESET<< "\n";
     for (size_t i = 0; i < servers.size(); ++i) {
@@ -79,8 +77,8 @@ ServerConfig* selectServerConfig(std::vector<ServerConfig> &servers, const HttpR
 }
 
 
-
-RouteConfig* selectRouteConfig(ServerConfig &server, const std::string &path) 
+//  Helper functions for  appendRequestBufferAndProcess
+static RouteConfig* selectRouteConfig(ServerConfig &server, const std::string &path) 
 {
     std::cout << "selectRouteConfig 134 request.path  : " << path << std::endl;
     // --- ตัด path ให้เหลือเฉพาะ directory ถ้ามี file (มี . หลัง /)
@@ -105,8 +103,9 @@ RouteConfig* selectRouteConfig(ServerConfig &server, const std::string &path)
             std::cout << "      [MATCH]" << std::endl;
 
             // พิมพ์รายละเอียดของ route ที่ match
-            std::cout << "selectRouteConfig 157 call printRouteConfig\n";
-            RouteConfig::printRouteConfig(it->second);
+
+            std::cout << "selectRouteConfig 159 call Server::printSelecteRoutes(it->second)\n";
+            Server::printSelecteRoutes(it->second);
             return const_cast<RouteConfig*>(&it->second);
         } else {
             std::cout << ERROR_COLOR << "      [not match]" << RESET <<  std::endl;
@@ -119,14 +118,13 @@ RouteConfig* selectRouteConfig(ServerConfig &server, const std::string &path)
 }
 
 
-
-std::string resolvePath(const RouteConfig &route, const std::string &reqPath) 
+//  Helper functions for  appendRequestBufferAndProcess
+static std::string resolvePath(const RouteConfig &route, const std::string &reqPath) 
 {
     // 1. relativePath = reqPath - route.getPath()
     std::string relativePath = reqPath.substr(route.getPath().length());
     if (!relativePath.empty() && relativePath[0] != '/')
         relativePath = "/" + relativePath;
-
     // 2. ถ้า path เป็น directory → เติม index
     if (relativePath.empty() || relativePath[relativePath.length() - 1] == '/') {
         if (!route.getIndex().empty())
@@ -134,7 +132,6 @@ std::string resolvePath(const RouteConfig &route, const std::string &reqPath)
         else
             relativePath += "index.html";
     }
-
     // 3. ประกอบ root + relativePath
     std::string full;
     std::string root = route.getRoot();
@@ -144,25 +141,21 @@ std::string resolvePath(const RouteConfig &route, const std::string &reqPath)
         full = "./" + root + "/" + relativePath;
     else
         full = "./" + root + relativePath;
-
-
-    // // 4. ตรวจสอบว่าไฟล์มีจริง
+    // // 4.1 ตรวจสอบว่าไฟล์มีจริง
     // struct stat st;
     // if (::stat(full.c_str(), &st) == 0) {
     //     return full;
     // }
     // return "";
 
-
-
-    // 4. ไม่ !! ตรวจสอบว่าไฟล์มีจริง
+    // 4.2 ไม่ตรวจสอบว่าไฟล์มีจริง
     return full;
   
 }
 
 
-
-std::string ft_extractFileName(const std::string &path, bool containsDot) {
+//  Helper functions for  appendRequestBufferAndProcess
+static std::string extractFileName(const std::string &path, bool containsDot) {
     size_t posSlash = path.find_last_of('/');
     std::string temp;
 
@@ -187,8 +180,8 @@ std::string ft_extractFileName(const std::string &path, bool containsDot) {
     }
 }
 
-
-std::string ft_getFileExtension(const std::string &filePath)
+//  Helper functions for  appendRequestBufferAndProcess
+static std::string getFileExtension(const std::string &filePath)
 {
     size_t dotPos = filePath.find_last_of(".");
     if (dotPos != std::string::npos)
@@ -198,13 +191,13 @@ std::string ft_getFileExtension(const std::string &filePath)
 
 
 
+
 bool Connection::appendRequestBufferAndProcess(
                                         char *buffer,
                                         HttpRequest &request,
                                         size_t length,
                                         std::vector<ServerConfig> &servers) 
 {
-
     (void)buffer;
     (void)request;
     (void)length;
@@ -267,7 +260,11 @@ bool Connection::appendRequestBufferAndProcess(
     // // หา server config ตาม host/port
     srvConf = selectServerConfig(servers, request);
     std::cout  <<MONITOR_COLOR <<  "==== re-check  append 261 srvConf   = selectServerConfig(servers, request) ====\n"  << RESET;
-    // ConfigParser::printSelectedServer(srvConf);//<==print
+    Server::printSelectedServer(srvConf);//<==print
+    
+    // Server::printSelectedServer(srvConf);//<==print
+    // servers::printServerConfigs(servers);//<==print all
+
     if (!srvConf) {
         std::cout  << "append 264 if (!srvConf)";
         throw RequestException(403, "Forbidden");
@@ -296,9 +293,9 @@ bool Connection::appendRequestBufferAndProcess(
 
     
     // std::string path = "/var/www/html/index.html";
-    std::string fileWithExt = ft_extractFileName(resolvedPath, true);   // "sessionTest.py"
-    std::string fileNoExt   = ft_extractFileName(resolvedPath, false);  // "sessionTest"
-    std::string ext         = ft_getFileExtension(fileWithExt);         // ".py"
+    std::string fileWithExt = extractFileName(resolvedPath, true);   // "sessionTest.py"
+    std::string fileNoExt   = extractFileName(resolvedPath, false);  // "sessionTest"
+    std::string ext         = getFileExtension(fileWithExt);         // ".py"
     std::string cmd         = routeConf->getCGI(ext);                   // /usr/bin/python3
     // std::string cmd         = routeConf->getCGI(".py");
 
@@ -328,10 +325,6 @@ bool Connection::appendRequestBufferAndProcess(
     std::cout << "append 422 allowDiretoryBrowsing= " << (allowDirectoryListing ? "true" : "false") << std::endl;
     std::cout << "\n\n\n";
     ////////////////////////////////////////////////////////////////////////////////////
-
-
-
-
 
 
     // // 2. ถ้ามี directive return → redirect
@@ -385,18 +378,17 @@ bool Connection::appendRequestBufferAndProcess(
 
 
 
-
 bool Connection::handleHttpResponse(HttpRequest &request,
-    std::vector<ServerConfig> &servers,
-    size_t length)
+                                    std::vector<ServerConfig> &servers,
+                                    size_t length)
 {
-    std::cout  <<MONITOR_COLOR << "Response 507 \n" << RESET;
+    std::cout  <<MONITOR_COLOR << "                 Response 507 \n" << RESET;
     (void)length;
     (void)servers;
 
     try {
         std::string localPath = getResolvedPath();
-        std::cout  << "Response 529 localPath = " <<REQUEST_COLOR << localPath << RESET<< "\n";
+        std::cout  << "                 Response 529 localPath = " <<REQUEST_COLOR << localPath << RESET<< "\n";
 
         bool isUploadRequest = false;           // TODO: ตรวจจาก request
         std::string cmd;                        // TODO: ถ้าเป็น CGI ใส่ command
@@ -404,20 +396,49 @@ bool Connection::handleHttpResponse(HttpRequest &request,
         std::string requestPathContainFile = localPath;     // TODO: ตรวจว่า path เป็นไฟล์จริง
         bool allowDirectoryBrowsing = false;    // TODO: ดึงจาก route config
 
-        HttpResponse httpResponse;
 
+        ///////////////// cmd  localPath
+		// std::string requestPathContainFile = extractFileName( localPath, true);
+		// std::string cmd = route->getCGI(getFileExtension(requestPathContainFile));// to_do_list
+							
+
+
+		// std::cout << "\nprint by ==> 345 Connection::processRequest" << std::endl;
+		std::cout << "\n		Response 530 port 			= "     << REQUEST_COLOR << serverConfig.getPort() << RESET<< std::endl;
+		std::cout << "		Response 530 requestBuffer 		= \n" 	<< REQUEST_COLOR << requestBuffer << RESET <<  std::endl;
+		std::cout << "		Response 530 localPath 			= "   	<< REQUEST_COLOR << localPath <<  RESET << std::endl;
+		std::cout << "		Response 530 requestPathContainFile	= " << requestPathContainFile << std::endl;
+		std::cout << "		Response 530 cmd 			= " 		<< cmd << std::endl;
+		std::cout << "		Response 530 isUploadRequest 		= " << (isUploadRequest ? "true" : "false") << std::endl;
+		std::cout << "		Response 530 allowDirectoryBrowsing	= " << (allowDirectoryBrowsing ? "true" : "false") << std::endl;
+
+
+
+
+        HttpResponse httpResponse;
+        std::cout << MONITOR_COLOR << "Response 533 choose ...ft...\n" << RESET;
         if (request.method == "DELETE") {
+            std::cout << MONITOR_COLOR << "Response 543 call Delete ==> if (request.method == DELETE)\n" << RESET;
             httpResponse.handleDeleteMethod(localPath);
+            std::cout << "\n\nResponse 546 call httpResponse.printHeadersStatusBody()\n";
+            httpResponse.printHeadersStatusBody();
+
         }
         else if (isUploadRequest) {
+            std::cout << MONITOR_COLOR << "Response 552 call Uploads ==> if (isUploadRequest)\n" << RESET;
             // httpResponse.handleUploadedFiles(this, route, request);
+            std::cout << "\n\nResponse 554 call httpResponse.printHeadersStatusBody()\n";
+            httpResponse.printHeadersStatusBody();
         }
         else if (!cmd.empty()) {
+            std::cout << MONITOR_COLOR << "Response 560 call CGI ==> if (!cmd.empty())\n" << RESET;
             // httpResponse.processCGI(cmd, localPath, request, *srvConf, *route, rawPostBody);
+            std::cout << "\n\nResponse 562 call httpResponse.printHeadersStatusBody()\n";
+            httpResponse.printHeadersStatusBody();
         }
         else if (!requestPathContainFile.empty()) {
 
-            std::cout  <<MONITOR_COLOR << "Response 555 if(!requestPathContainFile.empty())\n" <<RESET;
+            std::cout  <<MONITOR_COLOR << "Response 555 call Static => if(!requestPathContainFile.empty())\n" <<RESET;
 
             httpResponse.getStaticFile(localPath);   
             std::cout << "\n\nResponse 558 call httpResponse.printHeadersStatusBody()\n"; 
@@ -425,10 +446,14 @@ bool Connection::handleHttpResponse(HttpRequest &request,
 
         }
         else if (allowDirectoryBrowsing) {
+            std::cout  <<MONITOR_COLOR << "Response 565 call generateDirectoryListing ==> if(allowDirectoryBrowsing)\n" <<RESET;
             // httpResponse.generateDirectoryListing(request, localPath);
+            std::cout << "\n\nResponse 567 call httpResponse.printHeadersStatusBody()\n" << RESET;
+            httpResponse.printHeadersStatusBody(); 
         }
         else {
-            std::cout  << "no DELETE  UPLOAD cmd.empty allow\n";
+            std::cout << ERROR_COLOR;
+            std::cout  << "Response 450 no call ==> final else ==> no DELETE  UPLOAD cmd.empty allow\n";
             throw RequestException(403, "Forbidden");
         }
 
@@ -469,3 +494,38 @@ bool Connection::handleHttpResponse(HttpRequest &request,
 }
 
 
+
+
+
+void Connection::printConnection() const {
+	std::cout << "======= Connection::printConnection() 46 ===========\n";
+	std::cout << std::left << std::setw(25) << "Field" << "Value\n";
+	std::cout << std::setw(25) << "Socket" << socket << "\n";
+	std::cout << std::setw(25) << "isReady" << std::boolalpha << isReady << "\n";
+	std::cout << std::setw(25) << "Body Length" << bodyLength << "\n";
+	std::cout << std::setw(25) << "Boundary" << boundary << "\n";
+	std::cout << std::setw(25) << "Request Buffer" << requestBuffer << "\n";
+	std::cout << std::setw(25) << "Raw POST Body Size" << rawPostBody.size() << " bytes\n";
+	std::cout << std::setw(25) << "Response Buffer" << responseBuffer << "\n";
+	std::cout << std::setw(25) << "Header Completed" << std::boolalpha << headerIsCompleted << "\n";
+	std::cout << std::setw(25) << "Request Completed" << std::boolalpha << requestIsCompleted << "\n";
+	std::cout << std::setw(25) << "Content Length" << contentLength << "\n";
+	std::cout << "==================================================\n";
+}
+
+
+// รับ HttpResponse แล้วแปลงเป็น responseBuffer
+void Connection::prepareResponse(const HttpResponse &response) {
+    responseBuffer = response.ResponseToString();
+}
+
+
+// ส่งออกไป
+void Connection::sendResponse() {
+    if (!responseBuffer.empty()) {
+        send(socket,
+             responseBuffer.c_str(),
+             responseBuffer.size(),
+             MSG_DONTWAIT);
+    }
+}

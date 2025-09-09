@@ -11,10 +11,9 @@ CC			=	c++
 CFLAGS		=	-Wall -Werror -Wextra -std=c++98 -pedantic
 
 #########################################################
-NAME		=	webserv
+NAME		=	Server
 
-HEADER		=	./include/ConfigParser.hpp \
-				./include/HttpRequest.hpp \
+HEADER		=	./include/HttpRequest.hpp \
 				./include/RouteConfig.hpp \
 				./include/ServerConfig.hpp \
 				./include/Connection.hpp \
@@ -26,7 +25,6 @@ HEADER		=	./include/ConfigParser.hpp \
 
 SRC_FILES	=	./src/main.cpp \
 				./src/Run_server/HttpRequest.cpp \
-				./src/Run_server/ConfigParser.cpp \
 				./src/Set_server/RouteConfig.cpp \
 				./src/Set_server/ServerConfig.cpp \
 				./src/Set_server/Server.cpp \
@@ -103,13 +101,14 @@ re: fclean all
 
 .PHONY: all clean fclean re
 
+
+
+
 #########################################################
 
 t: all clean
 	@echo "$(GREEN)✅ run program$(COLOR_RESET)"
-	./$(NAME) $(CONFIG)
-
-
+	./Server $(CONFIG)
 
 
 # ✅ Success expected (2xx)
@@ -135,8 +134,6 @@ t: all clean
 # t63		GET /../etc/passwd → path traversal				400 Bad Request (ถูกบล็อก) หรือ 403
 # t64		DELETE /uploads/notfound.txt ที่ไม่มีอยู่				404 Not Found
 # t65		GET ไฟล์ /notfound.txt ที่ไม่มีอยู่						404 Not Found และโชว์ custom error page (errors/404.html)
-
-
 
 
 

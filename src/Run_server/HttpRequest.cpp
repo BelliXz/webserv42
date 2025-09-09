@@ -6,6 +6,8 @@ HttpRequest::HttpRequest():  contentLength(0) ,complete(false)
 {
 }
 
+
+// Helper function to parseHttpRequest
 static std::vector<std::string> split(const std::string& s, char delim)
 {
     std::vector<std::string>    tokens;
